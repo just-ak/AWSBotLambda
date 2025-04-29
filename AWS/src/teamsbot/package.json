@@ -1,0 +1,20 @@
+{
+  "author": "",
+  "dependencies": {
+    "@types/aws-lambda": "^8.10.147",
+    "aws-lambda": "^1.0.7",
+    "aws-sdk": "^2.1692.0",
+    "https": "^1.0.0"
+  },
+  "description": "",
+  "license": "ISC",
+  "main": "index.js",
+  "name": "teamsbot",
+  "scripts": {
+    "build": "tsc",
+    "package": "yarn prune --production && cp -R node_modules lib/node_modules/",
+    "prebuild": "yarn install"
+  },
+  "private": true,
+  "version": "1.0.0"
+}

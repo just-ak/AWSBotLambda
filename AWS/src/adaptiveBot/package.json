@@ -1,0 +1,40 @@
+{
+  "author": "",
+  "dependencies": {
+    "@microsoft/teams-ai": "^1.7.0",
+    "@microsoft/teams-js": "^2.36.0",
+    "@microsoft/teamsfx": "^3.0.2",
+    "@types/aws-lambda": "^8.10.147",
+    "@types/safe-json-stringify": "^1.1.5",
+    "@vendia/serverless-express": "^4.12.6",
+    "abort-controller": "^3.0.0",
+    "adaptive-expressions": "^4.23.1",
+    "adaptivecards-templating": "^2.3.1",
+    "aws-lambda": "^1.0.7",
+    "aws-sdk": "^2.1692.0",
+    "botbuilder": "^4.23.1",
+    "express": "^5.1.0",
+    "https": "^1.0.0",
+    "node-abort-controller": "^3.1.1",
+    "openai": "^4.96.0",
+    "safe-json-stringify": "^1.2.0",
+    "zod": "^3.24.3"
+  },
+  "description": "",
+  "license": "ISC",
+  "main": "index.js",
+  "name": "adaptive-bot",
+  "private": true,
+  "scripts": {
+    "build": "tsc",
+    "package": "yarn prune --production && cp -R node_modules lib/node_modules/",
+    "prebuild": "yarn install"
+  },
+  "type": "module",
+  "version": "1.0.0",
+  "devDependencies": {
+    "@types/express": "^5.0.1",
+    "@types/json-schema": "^7.0.15",
+    "@types/node": "^22.15.2"
+  }
+}

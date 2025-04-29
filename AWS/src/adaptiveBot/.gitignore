@@ -1,0 +1,16 @@
+*.js
+!jest.config.js
+
+
+node_modules
+coverage
+
+yarn-error.log
+
+# CDK asset staging directory
+.cdk.staging
+cdk.out
+
+# local files
+.DS_Store
+.vscode

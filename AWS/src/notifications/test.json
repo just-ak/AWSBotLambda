@@ -1,0 +1,51 @@
+{
+  "attachments": [
+    {
+      "content": {
+        "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+        "body": [
+          {
+            "size": "Medium",
+            "text": "🚀 **AWS Event Notification**",
+            "type": "TextBlock",
+            "weight": "Bolder"
+          },
+          {
+            "text": "🔹 **Event Type:** Parameter Store Change",
+            "type": "TextBlock",
+            "wrap": true
+          },
+          {
+            "text": "📍 **Source:** aws.ssm",
+            "type": "TextBlock",
+            "wrap": true
+          },
+          {
+            "text": "🌍 **Region:** eu-west-1",
+            "type": "TextBlock",
+            "wrap": true
+          },
+          {
+            "text": "📅 **Time:** undefined",
+            "type": "TextBlock",
+            "wrap": true
+          },
+          {
+            "text": "🔢 **AWS Account:** 677315747586",
+            "type": "TextBlock",
+            "wrap": true
+          },
+          {
+            "text": "📜 **Details:*",
+            "type": "TextBlock",
+            "wrap": true
+          }
+        ],
+        "type": "AdaptiveCard",
+        "version": "1.4"
+      },
+      "contentType": "application/vnd.microsoft.card.adaptive"
+    }
+  ],
+  "type": "message"
+}

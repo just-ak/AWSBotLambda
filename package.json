@@ -1,0 +1,13 @@
+{
+  "private": true,
+  "workspaces": [
+    "AWS",
+    "AWS/src/notifications",
+    "AWS/src/teamsbot"
+  ],
+  "scripts": {
+    "build": "yarn workspaces run build",
+    "package": "yarn workspaces run package",
+    "cdk": "cd AWS && cdk"
+  }
+}

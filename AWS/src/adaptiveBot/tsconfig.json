@@ -1,0 +1,27 @@
+{
+  "compilerOptions": {
+      "target": "es6",
+      "outDir": "./lib",
+      "typeRoots": ["./node_modules/@types", "./types"],
+      "types": ["node"],
+      "allowJs": true,
+      "checkJs": false,
+      "moduleResolution": "node",
+      "esModuleInterop": true,
+      "resolveJsonModule": true,
+      "strict": true,
+      "module": "commonjs",
+  },
+  "include": [
+      "./**/*",
+      "src/**/*.ts",
+      "src/**/*.d.ts",
+      "src/**/*.mjs"
+  ],
+  "exclude": [
+      "node_modules",
+      "**/*.spec.ts",
+      "**/*.d.ts",
+      "src/__tests__/"
+  ]
+}
