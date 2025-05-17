@@ -1,0 +1,83 @@
+{
+    "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+    "type": "AdaptiveCard",
+    "version": "1.4",
+    "body": [
+      {
+        "type": "TextBlock",
+        "text": "**🚨 AWS Health Notification**",
+        "wrap": true,
+        "size": "Large",
+        "weight": "Bolder",
+        "color": "Attention"
+      },
+      {
+        "type": "TextBlock",
+        "text": "Event Type: **{{eventTypeCode}}**",
+        "wrap": true
+      },
+      {
+        "type": "TextBlock",
+        "text": "Service: **{{service}}**",
+        "wrap": true
+      },
+      {
+        "type": "TextBlock",
+        "text": "Region: **{{region}}**",
+        "wrap": true
+      },
+      {
+        "type": "TextBlock",
+        "text": "Start Time: **{{startTime}}**",
+        "wrap": true
+      },
+      {
+        "type": "TextBlock",
+        "text": "End Time: **{{endTime}}**",
+        "wrap": true
+      },
+      {
+        "type": "TextBlock",
+        "text": "**Details:**",
+        "wrap": true,
+        "weight": "Bolder"
+      },
+      {
+        "type": "TextBlock",
+        "text": "{{description}}",
+        "wrap": true
+      }
+    ],
+    "actions": [
+      {
+        "type": "Action.Submit",
+        "title": "Create JIRA Ticket",
+        "data": {
+          "command": "createJira",
+          "eventType": "{{eventTypeCode}}",
+          "region": "{{region}}",
+          "description": "{{description}}"
+        }
+      },
+      {
+        "type": "Action.Submit",
+        "title": "Create Confluence Document",
+        "data": {
+          "command": "createConfluence",
+          "eventType": "{{eventTypeCode}}",
+          "region": "{{region}}",
+          "description": "{{description}}"
+        }
+      },
+      {
+        "type": "Action.Submit",
+        "title": "Acknowledge",
+        "data": {
+          "command": "acknowledgeEvent",
+          "eventType": "{{eventTypeCode}}",
+          "region": "{{region}}"
+        }
+      }
+    ]
+  }
+  

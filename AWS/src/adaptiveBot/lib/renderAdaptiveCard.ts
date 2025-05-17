@@ -1,4 +1,4 @@
-import notificationDefault from './adaptiveCards/notification-default.json';
+import notificationDefault from '../adaptiveCards/notification-default.json';
 
 /**
  * Renders an Adaptive Card with the provided data.

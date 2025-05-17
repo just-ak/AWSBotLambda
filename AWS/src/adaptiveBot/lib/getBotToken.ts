@@ -1,5 +1,5 @@
 import querystring from 'querystring';
-import { config } from './internal/config';
+import { config } from '../internal/config';
 import https from 'https';
 
 export async function getBotToken(): Promise<string> {

@@ -1,8 +1,8 @@
 import { getConversationState, startNewConversation, updateConversationState } from "./conversation";
-import { getBotToken } from "./getBotToken";
+import { getBotToken } from "./lib/getBotToken";
 import { config } from "./internal/config";
-import { renderAdaptiveCard } from "./renderAdaptiveCard";
-import { sendAdaptiveCard } from "./sendAdaptiveCard";
+import { renderAdaptiveCard } from "./lib/renderAdaptiveCard";
+import { sendAdaptiveCard } from "./lib/sendAdaptiveCard";
 
 import * as uuid from 'uuid';
 
@@ -39,12 +39,22 @@ export async function processHealthEvent(event: SNSMessage): Promise<void> {
         console.log('No existing conversation found. Starting new conversation...');
         // Start a new conversation or log this as a new health event
         await updateConversationState(conversationId, userId, healthEvent);
-        const adaptiveCard = renderAdaptiveCard({
+        const adaptiveCard2 = renderAdaptiveCard({
             title: `New Health Event Update: ${healthEvent.service}`,
             appName: "AWS Health Bot",
             description: healthEvent.description,
             notificationUrl: "https://aws.amazon.com/health/",
         });
+
+        const adaptiveCard = renderAdaptiveCard({
+            eventTypeCode: healthEvent.eventTypeCode, // Ensure this field exists in healthEvent
+            service: healthEvent.service,
+            region: healthEvent.region,
+            startTime: healthEvent.startTime,
+            endTime: healthEvent.endTime,
+            description: healthEvent.description,
+        });
+
         await sendAdaptiveCard(serviceUrl, conversationId, adaptiveCard, botToken);
     }
 }

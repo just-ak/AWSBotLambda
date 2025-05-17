@@ -3,18 +3,24 @@
   "dependencies": {
     "@types/aws-lambda": "^8.10.147",
     "aws-lambda": "^1.0.7",
-    "aws-sdk": "^2.1692.0",
-    "https": "^1.0.0"
+    "jsonwebtoken": "^9.0.2",
+    "jwks-rsa": "^3.1.0"
   },
   "description": "",
+  "devDependencies": {
+    "@types/express": "^5.0.1",
+    "@types/json-schema": "^7.0.15",
+    "@types/node": "^22.15.2"
+  },
   "license": "ISC",
-  "main": "index.js",
-  "name": "teamsbot",
+  "main": "authorizer.js",
+  "name": "authorizer",
+  "private": true,
   "scripts": {
     "build": "tsc",
     "package": "yarn prune --production && cp -R node_modules lib/node_modules/",
     "prebuild": "yarn install"
   },
-  "private": true,
+  "type": "module",
   "version": "1.0.0"
 }
