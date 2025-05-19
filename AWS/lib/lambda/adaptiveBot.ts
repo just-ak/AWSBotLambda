@@ -66,6 +66,7 @@ export class AdaptiveBot extends Construct {
         BOT_NAME: BOT_NAME,
         AWS_API_ENDPOINT_NAME: AWS_API_ENDPOINT_NAME,
         AWS_HOSTED_ZONE_NAME: AWS_HOSTED_ZONE_NAME,
+        dynamoDb: props.table.tableName,
       },
       tracing: Tracing.ACTIVE, // Enable X-Ray tracing
     });

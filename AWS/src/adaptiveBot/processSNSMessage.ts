@@ -1,9 +1,10 @@
-import { getConversationState, startNewConversation, updateConversationState } from "./conversation";
+import { startNewConversation, storeInDynamoDB } from "./conversation";
 import { getBotToken } from "./lib/getBotToken";
 import { config } from "./internal/config";
 import { renderAdaptiveCard } from "./lib/renderAdaptiveCard";
 import { sendAdaptiveCard } from "./lib/sendAdaptiveCard";
 
+const ASSETS =`https://${config.AWS_API_ENDPOINT_NAME}.${config.AWS_HOSTED_ZONE_NAME}/docs/assets`;
 // Factory function to create appropriate card data based on event source
 function createCardDataForEvent(parsedEvent: GenericEvent): any {
     // Determine the event source and return appropriate card data
@@ -16,6 +17,9 @@ function createCardDataForEvent(parsedEvent: GenericEvent): any {
                 description: `Operation: ${parsedEvent.detail?.operation || 'Unknown'}\nType: ${parsedEvent.detail?.type || 'Unknown'}`,
                 notificationUrl: "https://console.aws.amazon.com/systems-manager/parameters",
                 additionalInfo: `Region: ${parsedEvent.region || 'Unknown'}\nTime: ${parsedEvent.time || 'Unknown'}`,
+                logo: `${ASSETS}/systems-manager.png`,
+                // image: `${ASSETS}/Systems Manager.png`,
+                imageAltText: "SSM Image",
                 ...parsedEvent
             };
             
@@ -38,40 +42,46 @@ function createCardDataForEvent(parsedEvent: GenericEvent): any {
                 description:  JSON.stringify(parsedEvent.detail, null, 2),
                 notificationUrl: "https://console.aws.amazon.com/",
                 additionalInfo: `Time: ${parsedEvent.time || 'Unknown'}\nRegion: ${parsedEvent.region || 'Unknown'}`,
+                logo: `${ASSETS}/generic-logo.png`,
+                // image: `${ASSETS}/generic-image.png`,
+                imageAltText: "Generic Image",
                  ...parsedEvent
             };
     }
 }
 
 export async function processSNSMessage(event: SNSMessage): Promise<void> {
-    console.log('Received SNS Event:', JSON.stringify(event, null, 2));
+    // console.log('Received SNS Event:', JSON.stringify(event, null, 2));
 
     const parsedEvent: GenericEvent = JSON.parse(event.Message);
     console.log('Parsed Event:', parsedEvent);
 
-    const botToken = await getBotToken(); // Function to retrieve bot token
-    const serviceUrl = `https://smba.trafficmanager.net/uk/${config.MicrosoftAppTenantId}/`; // Fetch the service URL dynamically if needed
-    const userId = config.MicrosoftAppId!; // You'll want to dynamically retrieve the user ID
-    const existingConversation = await getConversationState('conversationId', userId);
+    const botToken = await getBotToken(); 
+    const serviceUrl = `https://smba.trafficmanager.net/uk/${config.MicrosoftAppTenantId}/`;
+    
+    if (parsedEvent.dynamoDBUUIDUserId === 'unknown') {
+        console.log('User ID is unknown. Using MicrosoftAppId as User ID.');
+        parsedEvent.dynamoDBUUIDUserId = config.MicrosoftAppId!;
+    }
 
-    if (existingConversation) {
-        console.log('Continuing conversation with:', existingConversation);
+    if (parsedEvent.dynamoDBUUIDConversationId != 'unknown' ) { 
+        console.log('Continuing conversation with:', parsedEvent.dynamoDBUUIDUserId);
 
         const cardData = createCardDataForEvent(parsedEvent);
         const adaptiveCard = renderAdaptiveCard(cardData);
 
-        await sendAdaptiveCard(serviceUrl, 'existingConversation', adaptiveCard, botToken);
+        await sendAdaptiveCard(serviceUrl, parsedEvent.dynamoDBUUIDConversationId, adaptiveCard, botToken);
     } else {
-        console.log('No existing conversation found. Starting new conversation...');
-        const conversationId = await startNewConversation(serviceUrl, userId, botToken);
+        // console.log('No existing conversation found. Starting new conversation...');
+        const conversationId = await startNewConversation(serviceUrl, parsedEvent.dynamoDBUUIDUserId, botToken);
+        // console.log('New conversation ID:', conversationId);
+        parsedEvent.dynamoDBUUIDConversationId = conversationId
 
-        console.log('No existing conversation found. Starting new conversation...');
-        // Start a new conversation or log this as a new health event
-        await updateConversationState(conversationId, userId, parsedEvent);
-
+        await storeInDynamoDB(parsedEvent.dynamoDBUUID, parsedEvent);
+        console.log('Storing event in DynamoDB with conversation ID:', JSON.stringify(parsedEvent, null, 2));
         const cardData = createCardDataForEvent(parsedEvent);
         const adaptiveCard = renderAdaptiveCard(cardData);
-
-        await sendAdaptiveCard(serviceUrl, conversationId, adaptiveCard, botToken);
+        // console.log('Adaptive Card:', JSON.stringify(adaptiveCard, null, 2));
+        await sendAdaptiveCard(serviceUrl, parsedEvent.dynamoDBUUIDConversationId , adaptiveCard, botToken);
     }
 }

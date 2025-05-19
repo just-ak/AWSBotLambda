@@ -10,8 +10,7 @@ const SNS_TOPIC_ARN = process.env.SNS_TOPIC_ARN;
 
 // Define the JSON document specifying fields to remove per event type
 const FIELD_REMOVAL_RULES: Record<string, string[]> = {
-  'aws.ssm': ['version', 'id', 
-    //'time'
+  'aws.ssm': ['version', 'id', 'time','detail'
      ],
 };
 
@@ -21,29 +20,30 @@ export const handler: Handler = async (event: any, context: Context, callback: C
 
   const eventType = event.source;
   const message = sanitizeMessage(event, eventType);
-
   console.log('Received sanitizeMessage:', message);
-
   const uniqueIdentifier = createHash('sha256').update(JSON.stringify(message)).digest('hex');
-
+  event.dynamoDBUUIDCount = 1;
+  event.dynamoDBUUIDTimeStamp = new Date().toISOString();
+  event.dynamoDBUUIDConversationId = 'unknown';
+  event.dynamoDBUUIDUserId = 'unknown';
   // Check if message already exists in DynamoDB
-  const exists = await checkIfExists(uniqueIdentifier);
-  if (exists) {
-    console.log(`Duplicate message detected: ${uniqueIdentifier}, skipping processing.`);
-    // continue;
-  } else {
-    // Store the UUID in DynamoDB to mark it as processed
-    // const messageID = await msTeamsHandler(event);
-
-    // event.msTeamsMessageId = messageID;
+  const result = await checkIfExists(uniqueIdentifier);
+  if (result.exists) {
+    console.log(`Duplicate message detected: ${uniqueIdentifier}, updating count.`);
+    const existingEvent = JSON.parse(result.item.event.S);
+    event.dynamoDBUUIDCount = (existingEvent.dynamoDBUUIDCount || 0) + 1;
+    event.dynamoDBUUIDTimeStamp = new Date().toISOString();
+    event.dynamoDBUUID = uniqueIdentifier;
+    event.dynamoDBUUIDConversationId = existingEvent.dynamoDBUUIDConversationId || 'unknown';
+    event.dynamoDBUUIDUserId = existingEvent.dynamoDBUUIDUserId || 'unknown';
     await storeInDynamoDB(uniqueIdentifier, event);
-
-    // Process the message (implement your own processing logic)
+  } else {
+    await storeInDynamoDB(uniqueIdentifier, event);
     console.log(`Processing event type: ${eventType} with ID: ${uniqueIdentifier}`);
     event.detail.name = `${event.detail.name}`;
     event.dynamoDBUUID = uniqueIdentifier;
-
-    const command = new PublishCommand({
+  }
+  const command = new PublishCommand({
       Message: JSON.stringify(event),
       TopicArn: SNS_TOPIC_ARN,
     });
@@ -55,7 +55,6 @@ export const handler: Handler = async (event: any, context: Context, callback: C
     } catch (error) {
       console.error('Error publishing message to SNS', error);
     }
-  }
 };
 // eslint-disable-next-line
   const sanitizeMessage = (message: any, eventType: string): any => {
@@ -80,7 +79,7 @@ export const handler: Handler = async (event: any, context: Context, callback: C
   return obj;
 };
 
-const checkIfExists = async (id: string): Promise<boolean> => {
+const checkIfExists = async (id: string): Promise<{ exists: boolean; item?: any }> => {
   const command = new GetItemCommand({
     TableName: TABLE_NAME,
     Key: { id: { S: id } },
@@ -88,10 +87,13 @@ const checkIfExists = async (id: string): Promise<boolean> => {
 
   try {
     const response = await dynamoDbClient.send(command);
-    return response.Item !== undefined;
+    if (response.Item !== undefined) {
+      return { exists: true, item: response.Item };
+    }
+    return { exists: false };
   } catch (error) {
     console.log('Item not found', error);
-    return false;
+    return { exists: false };
   }
 };
 //eslint-disable-next-line

@@ -16,7 +16,8 @@
               "items": [
                 {
                   "type": "Image",
-                  "url": "https://cdn.jsdelivr.net/gh/adaptivecards/adaptivecards-assets/assets/microsoft.png",
+                  "url": "${logo}",
+                  "altText": "${imageAltText}",
                   "size": "Small",
                   "horizontalAlignment": "center"
                 }

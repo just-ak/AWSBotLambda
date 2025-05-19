@@ -49,6 +49,8 @@ interface GenericEvent {
   region: string;
   resources: string[];
   dynamoDBUUID: string;
+  dynamoDBUUIDConversationId: string;
+  dynamoDBUUIDUserId: string;
   detail: {
     name: string;
     type: string;

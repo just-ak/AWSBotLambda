@@ -1,8 +1,10 @@
-import { config, TABLE_NAME } from "./internal/config";
-import DynamoDB from 'aws-sdk/clients/dynamodb';
+import { config } from "./internal/config";
+// import DynamoDB from 'aws-sdk/clients/dynamodb';
 import https from 'https';
+import { DynamoDBClient, GetItemCommand, PutItemCommand } from '@aws-sdk/client-dynamodb';
 
-const dynamodbClient = new DynamoDB.DocumentClient();
+const dynamoDbClient = new DynamoDBClient({ });
+const TABLE_NAME = process.env.dynamoDb;
 
 export async function startNewConversation(
   serviceUrl: string,
@@ -50,7 +52,7 @@ export async function startNewConversation(
     },
   };
   
-  console.log('Request options:', JSON.stringify(options, null, 2));
+  // console.log('Request options:', JSON.stringify(options, null, 2));
   
   return new Promise((resolve, reject) => {
     const req = https.request(options, (res) => {
@@ -64,7 +66,7 @@ export async function startNewConversation(
         if (res.statusCode && res.statusCode >= 200 && res.statusCode < 300) {
           const response = JSON.parse(responseBody);
           const conversationId = response.id;
-          console.log('New conversation started with ID:', conversationId);
+          // console.log('New conversation started with ID:', conversationId);
           resolve(conversationId);
         } else {
           reject(
@@ -82,41 +84,24 @@ export async function startNewConversation(
   });
 }
 
+  export const storeInDynamoDB = async (id: string, event: any): Promise<void> => {
+  // delete after 30 days
+  const ttl = Math.floor(Date.now() / 1000) + 2592000;
 
-export async function getConversationState(conversationId: string, userId: string) {
-    const params = {
-      TableName: TABLE_NAME,
-      Key: {
-        conversationId: conversationId,
-        userId: userId,
-      },
-    };
-  
-    try {
-      const result = await dynamodbClient.get(params).promise();
-      return result.Item;
-    } catch (error) {
-      console.error('Error fetching conversation state:', error);
-      return null;
-    }
+  const command = new PutItemCommand({
+    TableName: TABLE_NAME,
+    Item: {
+      id: { S: id },
+      timestamp: { S: new Date().toISOString() },
+      event: { S: JSON.stringify(event) },
+      ttl: { N: ttl.toString() },
+    },
+  });
+
+  try {
+    await dynamoDbClient.send(command);
+    console.log(`Stored message ID: ${id} in DynamoDB.`);
+  } catch (error) {
+    console.error('Error storing message in DynamoDB', error);
   }
-  
-export async function updateConversationState(conversationId: string, userId: string, genericEvent: GenericEvent) {
-    const params = {
-      TableName: TABLE_NAME,
-      Item: {
-        conversationId: conversationId,
-        userId: userId,
-        lastEvent: JSON.stringify(genericEvent),
-        lastEventTimestamp: genericEvent.time,
-      },
-    };
-  
-    try {
-      await dynamodbClient.put(params).promise();
-      console.log('Conversation state updated:', params.Item);
-    } catch (error) {
-      console.error('Error updating conversation state:', error);
-    }
-  }
-  
+};

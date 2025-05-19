@@ -10,6 +10,7 @@ import { EndPointApiGateway } from "./apiGateway/endPointApiGateway";
 import { Route53EndPoint } from "./route53/endPoint";
 import { DocumentationBucket } from "./s3/documentation";
 import { DocsEndpoint } from "./apiGateway/docsEndpoint";
+import { EventRecorder } from "./dynamoDb/events";
 
 
 export class Notifications extends Stack {
@@ -20,25 +21,28 @@ export class Notifications extends Stack {
       displayName: 'awsNotificationsTopic'
     });
 
-    const messageDeduplicationTable = new Table(this, 'MessageDeduplicationTable', {
-      partitionKey: { name: 'id', type: AttributeType.STRING },
-      removalPolicy: RemovalPolicy.DESTROY,
+    // const eventTable = new Table(this, 'MessageDeduplicationTable', {
+    //   partitionKey: { name: 'id', type: AttributeType.STRING },
+    //   removalPolicy: RemovalPolicy.DESTROY,
+    // });
+
+     const eventTable = new EventRecorder(this, 'EventRecorder', {
     });
 
     const messageReducer = new MessageReducer(this, 'messageReducerLambda', {
       topic: snsTopic.topic,
-      table: messageDeduplicationTable,
+      table: eventTable.table,
     });
     new EventBridgeRules(this, 'EventBridgeRule', {
       targetLambda: messageReducer.lambda,
     });
 
-    const healthEventConversations = new HealthEventConversations(this, 'HealthEventConversations', {
-    });
+    // const healthEventConversations = new HealthEventConversations(this, 'HealthEventConversations', {
+    // });
 
     const adaptiveBot = new AdaptiveBot(this, 'adaptiveBot', {
       topic: snsTopic.topic,
-      table: healthEventConversations.table,
+      table: eventTable.table,
     });
 
  
