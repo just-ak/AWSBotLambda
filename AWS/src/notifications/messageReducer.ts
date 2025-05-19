@@ -36,6 +36,7 @@ export const handler: Handler = async (event: any, context: Context, callback: C
     event.dynamoDBUUID = uniqueIdentifier;
     event.dynamoDBUUIDConversationId = existingEvent.dynamoDBUUIDConversationId || 'unknown';
     event.dynamoDBUUIDUserId = existingEvent.dynamoDBUUIDUserId || 'unknown';
+    event.dynamoDBUUIDActivityId = existingEvent.dynamoDBUUIDActivityId || 'unknown';
     await storeInDynamoDB(uniqueIdentifier, event);
   } else {
     await storeInDynamoDB(uniqueIdentifier, event);

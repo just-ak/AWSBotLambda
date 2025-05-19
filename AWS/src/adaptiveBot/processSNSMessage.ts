@@ -77,11 +77,14 @@ export async function processSNSMessage(event: SNSMessage): Promise<void> {
         // console.log('New conversation ID:', conversationId);
         parsedEvent.dynamoDBUUIDConversationId = conversationId
 
-        await storeInDynamoDB(parsedEvent.dynamoDBUUID, parsedEvent);
         console.log('Storing event in DynamoDB with conversation ID:', JSON.stringify(parsedEvent, null, 2));
         const cardData = createCardDataForEvent(parsedEvent);
         const adaptiveCard = renderAdaptiveCard(cardData);
         // console.log('Adaptive Card:', JSON.stringify(adaptiveCard, null, 2));
-        await sendAdaptiveCard(serviceUrl, parsedEvent.dynamoDBUUIDConversationId , adaptiveCard, botToken);
+        const activityId = await sendAdaptiveCard(serviceUrl, parsedEvent.dynamoDBUUIDConversationId , adaptiveCard, botToken,  parsedEvent.dynamoDBUUIDActivityId || undefined);
+        parsedEvent.dynamoDBUUIDActivityId = activityId;
+        console.log('Activity ID:', activityId);
+        await storeInDynamoDB(parsedEvent.dynamoDBUUID, parsedEvent);
+
     }
 }

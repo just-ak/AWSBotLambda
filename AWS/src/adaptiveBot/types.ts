@@ -51,6 +51,7 @@ interface GenericEvent {
   dynamoDBUUID: string;
   dynamoDBUUIDConversationId: string;
   dynamoDBUUIDUserId: string;
+  dynamoDBUUIDActivityId: string;
   detail: {
     name: string;
     type: string;
