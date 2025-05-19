@@ -37,42 +37,42 @@ export class EventBridgeRules extends Construct {
             source: ['aws.ssm'],
             detailType: ['Parameter Store Change', 'Parameter Store Policy Action'],
           },
-          // {
-          //   source: ['aws.iam'],
-          // },
-          // {
-          //   source: ['aws.health'],
-          // },
-          // {
-          //   source: ['aws.support'],
-          // },
-          // {
-          //   source: ['aws.budgets'],
-          // },
-          // {
-          //   source: ['aws.cloudformation'],
-          //   detailType: ['CloudFormation Stack Status Change'],
-          //   detail: {
-          //     'status-details': {
-          //       status: [
-          //         'FAILED',
-          //         'ROLLBACK_FAILED',
-          //         'ROLLBACK_COMPLETE',
-          //         'DELETE_FAILED',
-          //         'UPDATE_ROLLBACK_FAILED',
-          //         'UPDATE_ROLLBACK_COMPLETE',
-          //         'CREATE_FAILED',
-          //         'UPDATE_FAILED',
-          //       ],
-          //     },
-          //   },
-          // },
-          // {
-          //   source: ['aws.quotas'], // TestMe
-          // },
-          // {
-          //   source: ['aws.codepipeline'], // TestMe
-          // },
+          {
+            source: ['aws.iam'],
+          },
+          {
+            source: ['aws.health'],
+          },
+          {
+            source: ['aws.support'],
+          },
+          {
+            source: ['aws.budgets'],
+          },
+          {
+            source: ['aws.cloudformation'],
+            detailType: ['CloudFormation Stack Status Change'],
+            detail: {
+              'status-details': {
+                status: [
+                  'FAILED',
+                  'ROLLBACK_FAILED',
+                  'ROLLBACK_COMPLETE',
+                  'DELETE_FAILED',
+                  'UPDATE_ROLLBACK_FAILED',
+                  'UPDATE_ROLLBACK_COMPLETE',
+                  'CREATE_FAILED',
+                  'UPDATE_FAILED',
+                ],
+              },
+            },
+          },
+          {
+            source: ['aws.quotas'], // TestMe
+          },
+          {
+            source: ['aws.codepipeline'], // TestMe
+          },
         ];
         rules.map((rule) => {
           new Rule(this, `${rule.source.join().replace('.', '_').replace(',', '_')}`, {

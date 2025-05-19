@@ -101,14 +101,14 @@ export async function getConversationState(conversationId: string, userId: strin
     }
   }
   
-export async function updateConversationState(conversationId: string, userId: string, healthEvent: HealthEvent) {
+export async function updateConversationState(conversationId: string, userId: string, genericEvent: GenericEvent) {
     const params = {
       TableName: TABLE_NAME,
       Item: {
         conversationId: conversationId,
         userId: userId,
-        lastHealthEvent: JSON.stringify(healthEvent),
-        lastEventTimestamp: healthEvent.timestamp,
+        lastEvent: JSON.stringify(genericEvent),
+        lastEventTimestamp: genericEvent.time,
       },
     };
   

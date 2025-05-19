@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AWS Bot Documentation</title>
+    <style>
+        :root {
+            --primary-color: #232f3e;
+            --secondary-color: #ff9900;
+            --text-color: #333;
+            --light-bg: #f8f9fa;
+            --dark-bg: #232f3e;
+        }
+        
+        body {
+            font-family: 'Amazon Ember', Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            color: var(--text-color);
+            background-color: var(--light-bg);
+        }
+        
+        .container {
+            width: 80%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+        
+        header {
+            background-color: var(--dark-bg);
+            color: white;
+            padding: 2rem 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .logo h1 {
+            margin: 0;
+            font-weight: 300;
+        }
+        
+        .logo span {
+            color: var(--secondary-color);
+            font-weight: 700;
+        }
+        
+        .content {
+            background-color: white;
+            padding: 2rem;
+            margin-top: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.05);
+        }
+        
+        h2 {
+            color: var(--primary-color);
+            border-bottom: 1px solid #eee;
+            padding-bottom: 0.5rem;
+        }
+        
+        .card {
+            border: 1px solid #eee;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .card h3 {
+            margin-top: 0;
+            color: var(--primary-color);
+        }
+        
+        .command-example {
+            background-color: #f1f1f1;
+            border-left: 4px solid var(--secondary-color);
+            padding: 1rem;
+            font-family: monospace;
+            margin: 1rem 0;
+            border-radius: 0 4px 4px 0;
+            overflow-x: auto;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 3rem;
+            padding: 2rem 0;
+            color: #666;
+            background-color: white;
+            border-top: 1px solid #eee;
+        }
+        
+        .diagram-container {
+            margin: 2rem 0;
+            text-align: center;
+        }
+        
+        .diagram {
+            max-width: 100%;
+            height: auto;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            border-radius: 8px;
+        }
+        
+        .tabs {
+            display: flex;
+            margin-bottom: -1px;
+        }
+        
+        .tab {
+            padding: 0.75rem 1.5rem;
+            border: 1px solid #ddd;
+            border-bottom: none;
+            border-radius: 8px 8px 0 0;
+            background-color: #f8f9fa;
+            cursor: pointer;
+            margin-right: 5px;
+        }
+        
+        .tab.active {
+            background-color: white;
+            border-bottom: 1px solid white;
+        }
+        
+        .tab-content {
+            display: none;
+            border: 1px solid #ddd;
+            padding: 1.5rem;
+            border-radius: 0 8px 8px 8px;
+            background-color: white;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .code-block {
+            background-color: #f6f8fa;
+            border-radius: 6px;
+            padding: 1rem;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            margin: 1rem 0;
+            border: 1px solid #e1e4e8;
+        }
+        
+        .card-preview {
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 1rem;
+            margin: 1rem 0;
+            background-color: white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+        
+        table th, table td {
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+        
+        table th {
+            background-color: #f8f9fa;
+        }
+        
+        .info-box {
+            background-color: #e6f7ff;
+            border-left: 4px solid #1890ff;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 0 4px 4px 0;
+        }
+        
+        .warning-box {
+            background-color: #fff7e6;
+            border-left: 4px solid #fa8c16;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 0 4px 4px 0;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="logo">
+                <h1>AWS <span>Bot</span> Documentation</h1>
+            </div>
+        </div>
+    </header>
+    
+    <div class="container">
+        <div class="content">
+            <h2>Welcome to Your AWS Bot</h2>
+            <p>
+                This documentation provides comprehensive information on how to use, configure, and interact with your AWS Bot.
+                The bot integrates with your messaging platform to provide real-time AWS notifications, resource management,
+                and automated responses to AWS-related queries.
+            </p>
+            
+            <div class="diagram-container">
+                <h3>Architecture Overview</h3>
+                <svg class="diagram" width="800" height="400" viewBox="0 0 800 400">
+                    <!-- Architecture Diagram -->
+                    <rect x="10" y="10" width="780" height="380" fill="#f8f9fa" stroke="#ddd" stroke-width="1" rx="8" />
+                    
+                    <!-- AWS Cloud -->
+                    <rect x="400" y="50" width="350" height="300" fill="#F7F8FA" stroke="#232F3E" stroke-width="2" rx="10" />
+                    <text x="575" y="80" font-size="16" text-anchor="middle" font-weight="bold">AWS Cloud</text>
+                    
+                    <!-- Lambda -->
+                    <rect x="500" y="100" width="120" height="60" fill="#FF9900" stroke="#232F3E" stroke-width="2" rx="4" />
+                    <text x="560" y="140" font-size="14" text-anchor="middle" fill="white" font-weight="bold">Lambda</text>
+                    
+                    <!-- EventBridge -->
+                    <rect x="500" y="200" width="120" height="60" fill="#FF9900" stroke="#232F3E" stroke-width="2" rx="4" />
+                    <text x="560" y="240" font-size="14" text-anchor="middle" fill="white" font-weight="bold">EventBridge</text>
+                    
+                    <!-- SNS -->
+                    <rect x="650" y="150" width="80" height="60" fill="#FF9900" stroke="#232F3E" stroke-width="2" rx="4" />
+                    <text x="690" y="190" font-size="14" text-anchor="middle" fill="white" font-weight="bold">SNS</text>
+                    
+                    <!-- Teams/Slack -->
+                    <rect x="100" y="150" width="200" height="100" fill="#464EB8" stroke="#232F3E" stroke-width="2" rx="10" />
+                    <text x="200" y="200" font-size="16" text-anchor="middle" fill="white" font-weight="bold">Messaging Platform</text>
+                    
+                    <!-- Arrows -->
+                    <line x1="300" y1="180" x2="495" y2="130" stroke="#333" stroke-width="2" marker-end="url(#arrow)" />
+                    <line x1="560" y1="160" x2="560" y2="195" stroke="#333" stroke-width="2" marker-end="url(#arrow)" />
+                    <line x1="620" y1="130" x2="645" y2="150" stroke="#333" stroke-width="2" marker-end="url(#arrow)" />
+                    <line x1="500" y1="230" x2="350" y2="230" stroke="#333" stroke-width="2" marker-end="url(#arrow)" />
+                    <line x1="350" y1="230" x2="300" y2="200" stroke="#333" stroke-width="2" marker-end="url(#arrow)" />
+                    
+                    <!-- Arrow Marker -->
+                    <defs>
+                        <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+                            <path d="M0,0 L0,6 L9,3 z" fill="#333" />
+                        </marker>
+                    </defs>
+                </svg>
+                <p><em>Figure 1: AWS Bot Architecture Diagram showing the interaction between messaging platforms and AWS services</em></p>
+            </div>
+            
+            <h2>Getting Started</h2>
+            <div class="card">
+                <h3>Prerequisites</h3>
+                <ul>
+                    <li>AWS Account with appropriate permissions</li>
+                    <li>Node.js 14.x or later</li>
+                    <li>AWS CDK installed</li>
+                    <li>Messaging platform configured (Teams, Slack, etc.)</li>
+                </ul>
+            </div>
+            
+            <div class="card">
+                <h3>Quick Setup</h3>
+                <p>
+                    To begin using the AWS Bot, you'll need to configure your environment and deploy the necessary components.
+                    Follow these basic steps to get started:
+                </p>
+                <ol>
+                    <li>Clone the repository and navigate to the project directory</li>
+                    <li>Install dependencies:
+                        <div class="command-example">npm install</div>
+                    </li>
+                    <li>Configure AWS credentials:
+                        <div class="command-example">aws configure</div>
+                    </li>
+                    <li>Deploy the bot using CDK:
+                        <div class="command-example">npm run cdk deploy</div>
+                    </li>
+                    <li>Configure your messaging platform webhook</li>
+                </ol>
+                
+                <div class="info-box">
+                    <strong>Note:</strong> For detailed setup instructions, refer to the <a href="setup.html">Setup Guide</a>.
+                </div>
+            </div>
+            
+            <h2>Features</h2>
+            <div class="card">
+                <h3>Core Capabilities</h3>
+                <ul>
+                    <li><strong>AWS Resource Management</strong> - Create, modify, and delete AWS resources</li>
+                    <li><strong>Automated Responses</strong> - Get quick answers to common AWS questions</li>
+                    <li><strong>Cost Optimization</strong> - Identify cost-saving opportunities</li>
+                    <li><strong>Security Compliance</strong> - Check resources against best practices</li>
+                    <li><strong>Event Notifications</strong> - Receive notifications about AWS events in real-time</li>
+                    <li><strong>Adaptive Cards</strong> - Rich interactive cards for better information display</li>
+                </ul>
+            </div>
+            
+            <h2>Adaptive Cards</h2>
+            <div class="card">
+                <h3>Overview</h3>
+                <p>
+                    Adaptive Cards provide a way to present information in a visually appealing and interactive format.
+                    The AWS Bot uses Adaptive Cards to display AWS notifications and event data in a structured way.
+                </p>
+                
+                <div class="tabs">
+                    <div class="tab active" onclick="showTab('default-card')">Default Card</div>
+                    <div class="tab" onclick="showTab('ssm-card')">SSM Card</div>
+                    <div class="tab" onclick="showTab('generic-card')">Generic Card</div>
+                </div>
+                
+                <div id="default-card" class="tab-content active">
+                    <h4>Default Notification Card</h4>
+                    <p>Used for standard notifications with a title, description, and optional action.</p>
+                    <div class="card-preview">
+                        <h4>AWS EC2 Instance State Change</h4>
+                        <p>AWS CloudWatch Events</p>
+                        <p>Your EC2 instance i-12345abcde has changed state to running.</p>
+                        <ul>
+                            <li><strong>Event Type:</strong> EC2 Instance State-change Notification</li>
+                            <li><strong>Source:</strong> aws.ec2</li>
+                            <li><strong>Time:</strong> 2023-09-15T14:30:15Z</li>
+                            <li><strong>Region:</strong> us-east-1</li>
+                            <li><strong>Account:</strong> 123456789012</li>
+                        </ul>
+                        <div style="padding: 5px 10px; background: #0078d4; color: white; display: inline-block; border-radius: 4px;">View in Console</div>
+                    </div>
+                    
+                    <div class="code-block">
+{
+  "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+  "type": "AdaptiveCard",
+  "version": "1.4",
+  "body": [
+    {
+      "type": "TextBlock",
+      "text": "${title}",
+      "size": "Large",
+      "weight": "Bolder"
+    },
+    // ...more card definition...
+  ]
+}
+                    </div>
+                </div>
+                
+                <div id="ssm-card" class="tab-content">
+                    <h4>SSM Specific Card</h4>
+                    <p>Specialized card for AWS Systems Manager notifications</p>
+                    <div class="card-preview">
+                        <h4>SSM Patching Complete</h4>
+                        <p>AWS Systems Manager</p>
+                        <p>Patching operation completed on 5 instances.</p>
+                        <ul>
+                            <li><strong>Operation:</strong> Patch-Window-Execution</li>
+                            <li><strong>Status:</strong> Complete</li>
+                            <li><strong>Success Rate:</strong> 100%</li>
+                            <li><strong>Window ID:</strong> mw-12345abcde</li>
+                        </ul>
+                        <div style="padding: 5px 10px; background: #0078d4; color: white; display: inline-block; border-radius: 4px;">View Details</div>
+                    </div>
+                </div>
+                
+                <div id="generic-card" class="tab-content">
+                    <h4>Generic Event Card</h4>
+                    <p>Flexible card for handling various AWS event types</p>
+                    <div class="card-preview">
+                        <h4>Generic AWS Event</h4>
+                        <p>AWS Service</p>
+                        <p>Event details will be displayed here</p>
+                        <div style="padding: 5px 10px; background: #0078d4; color: white; display: inline-block; border-radius: 4px;">View Details</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h3>Custom Adaptive Cards</h3>
+                <p>
+                    You can create custom Adaptive Cards for specific AWS services or event types.
+                    Place your custom card templates in the <code>adaptiveCards</code> directory and register them in the card registry.
+                </p>
+                
+                <div class="code-block">
+// Add your custom card to the registry
+const cardTemplates = {
+  'notification-default': notificationDefault,
+  'generic-card': genericCard,
+  'ssm-card': ssmCard,
+  'your-custom-card': yourCustomCardTemplate
+};
+                </div>
+                
+                <div class="warning-box">
+                    <strong>Important:</strong> Make sure your custom card template follows the Adaptive Card schema and includes the necessary placeholder variables.
+                </div>
+            </div>
+            
+            <h2>Usage Examples</h2>
+            <div class="card">
+                <h3>Receiving Notifications</h3>
+                <p>
+                    Once configured, the bot will automatically send notifications for the AWS events you've subscribed to.
+                    Here's what you might see in your messaging platform:
+                </p>
+                <img src="images/notification-example.png" alt="Notification Example" style="max-width: 100%; border: 1px solid #ddd; border-radius: 4px;">
+            </div>
+            
+            <div class="card">
+                <h3>Basic Commands</h3>
+                <p>
+                    Here are some examples of how to interact with the bot:
+                </p>
+                <div class="command-example">
+                    # Ask the bot for information
+                    @bot describe-my-ec2-instances
+                </div>
+                <div class="command-example">
+                    # Get help with a specific service
+                    @bot help s3
+                </div>
+                <div class="command-example">
+                    # Check service status
+                    @bot status us-east-1
+                </div>
+            </div>
+            
+            <h2>Configuration</h2>
+            <div class="card">
+                <h3>Event Mapping</h3>
+                <p>
+                    The bot maps AWS events to specific Adaptive Card templates. You can customize this mapping in the configuration file:
+                </p>
+                
+                <div class="code-block">
+{
+  "eventMappings": {
+    "aws.ec2": "ec2-card",
+    "aws.ssm": "ssm-card",
+    "aws.cloudwatch": "cloudwatch-card",
+    "default": "notification-default"
+  }
+}
+                </div>
+            </div>
+            
+            <div class="card">
+                <h3>Custom Settings</h3>
+                <p>
+                    You can customize the bot's behavior by modifying the configuration files:
+                </p>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Setting</th>
+                            <th>Description</th>
+                            <th>Default</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>logLevel</td>
+                            <td>Sets the logging verbosity</td>
+                            <td>info</td>
+                        </tr>
+                        <tr>
+                            <td>messageFormat</td>
+                            <td>Format for message delivery (adaptiveCard, text)</td>
+                            <td>adaptiveCard</td>
+                        </tr>
+                        <tr>
+                            <td>maxRetries</td>
+                            <td>Maximum number of delivery attempts</td>
+                            <td>3</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="command-example">
+                    # Configuration file location
+                    ./config/bot-config.json
+                </div>
+            </div>
+            
+            <h2>Troubleshooting</h2>
+            <div class="card">
+                <h3>Common Issues</h3>
+                <ul>
+                    <li>
+                        <strong>Notification not received</strong>
+                        <p>Check Lambda execution logs and ensure the webhook URL is correctly configured.</p>
+                    </li>
+                    <li>
+                        <strong>Placeholder variables not replaced</strong>
+                        <p>Verify that your event data structure matches the placeholders in your Adaptive Card template.</p>
+                    </li>
+                    <li>
+                        <strong>Card rendering incorrectly</strong>
+                        <p>Validate your Adaptive Card JSON using the <a href="https://adaptivecards.io/designer/" target="_blank">Adaptive Cards Designer</a>.</p>
+                    </li>
+                </ul>
+            </div>
+            
+            <h2>API Reference</h2>
+            <div class="card">
+                <h3>renderAdaptiveCard</h3>
+                <p>
+                    The core function that renders an Adaptive Card with provided data.
+                </p>
+                <div class="code-block">
+/**
+ * Renders an Adaptive Card with the provided data.
+ * @param {any} data - The data to populate the Adaptive Card.
+ * @returns {any} - The rendered Adaptive Card.
+ */
+export function renderAdaptiveCard(data: any): any {
+  // Function implementation
+}
+                </div>
+                
+                <h4>Parameters</h4>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Parameter</th>
+                            <th>Type</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>data</td>
+                            <td>object</td>
+                            <td>Data object containing properties to be inserted into the card template</td>
+                        </tr>
+                        <tr>
+                            <td>data.adaptiveCard</td>
+                            <td>string</td>
+                            <td>Optional. The name of the card template to use</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <footer>
+        <div class="container">
+            <p>&copy; 2023 AWS Bot Documentation. All rights reserved.</p>
+        </div>
+    </footer>
+    
+    <script>
+        function showTab(tabId) {
+            // Hide all tab contents
+            const tabContents = document.querySelectorAll('.tab-content');
+            tabContents.forEach(tab => tab.classList.remove('active'));
+            
+            // Deactivate all tabs
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            
+            // Activate the selected tab and content
+            document.getElementById(tabId).classList.add('active');
+            
+            // Find and activate the tab button
+            const clickedTab = Array.from(tabs).find(tab => tab.getAttribute('onclick').includes(tabId));
+            if (clickedTab) clickedTab.classList.add('active');
+        }
+    </script>
+</body>
+</html>

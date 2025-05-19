@@ -2,53 +2,54 @@
 import { renderAdaptiveCard } from "./lib/renderAdaptiveCard";
 import { getBotToken } from "./lib/getBotToken";
 import { sendAdaptiveCard } from "./lib/sendAdaptiveCard";
-import { processHealthEvent } from "./processHealth";
+import { processSNSMessage } from "./processSNSMessage";
 import { verifyJwt } from "./lib/verifyJwt";
-
+import { config } from './internal/config';
 export const handler: any = async (event: any) => {
   // export const handler = async (event: any): Promise<{ statusCode: number; body: string }> => {
   console.log('Received event body:', JSON.stringify(event, null, 2));
 
   if (event.Records) {
     // SNS event processing
+    console.log('Processing SNS event');
     for (const record of event.Records) {
       const snsMessage = record.Sns;
-      await processHealthEvent(snsMessage);
+      await processSNSMessage(snsMessage);
     }
   } else {
-    // Bot framework message processing - verify JWT
-    const authHeader = event.headers?.Authorization || event.headers?.authorization;
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      console.log('Missing or invalid Authorization header');
-      return { statusCode: 401, body: "Unauthorized" };
-    }
+                      // // Bot framework message processing - verify JWT
+                      // const authHeader = event.headers?.Authorization || event.headers?.authorization;
+                      // if (!authHeader || !authHeader.startsWith('Bearer ')) {
+                      //   console.log('Missing or invalid Authorization header');
+                      //   return { statusCode: 401, body: "Unauthorized" };
+                      // }
 
-    const token = authHeader.substring(7); // Remove 'Bearer ' prefix
-    let decodedToken;
-    try {
-      decodedToken = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString());
-      console.log('Decoded JWT:', JSON.stringify(decodedToken, null, 2));
-    } catch (error) {
-      console.error('Error decoding JWT token:', error);
-      return { statusCode: 401, body: "Invalid token format" };
-    }
-    
-    try {
-      const isValid = await verifyJwt(token);
-      if (!isValid) {
-        console.log('JWT validation failed');
-        // For development purposes, you might want to bypass this check temporarily
-        // Remove this comment in production
-        // return { statusCode: 401, body: "Unauthorized" };
-      } else {
-        console.log('JWT validation successful');
-      }
-    } catch (error) {
-      console.error('JWT verification error:', error);
-      // For development purposes, you might want to bypass this check temporarily
-      // Remove this comment in production
-      // return { statusCode: 401, body: "Unauthorized" };
-    }
+                      // const token = authHeader.substring(7); // Remove 'Bearer ' prefix
+                      // let decodedToken;
+                      // try {
+                      //   decodedToken = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString());
+                      //   console.log('Decoded JWT:', JSON.stringify(decodedToken, null, 2));
+                      // } catch (error) {
+                      //   console.error('Error decoding JWT token:', error);
+                      //   return { statusCode: 401, body: "Invalid token format" };
+                      // }
+                      
+                      // try {
+                      //   const isValid = await verifyJwt(token);
+                      //   if (!isValid) {
+                      //     console.log('JWT validation failed');
+                      //     // For development purposes, you might want to bypass this check temporarily
+                      //     // Remove this comment in production
+                      //     // return { statusCode: 401, body: "Unauthorized" };
+                      //   } else {
+                      //     console.log('JWT validation successful');
+                      //   }
+                      // } catch (error) {
+                      //   console.error('JWT verification error:', error);
+                      //   // For development purposes, you might want to bypass this check temporarily
+                      //   // Remove this comment in production
+                      //   // return { statusCode: 401, body: "Unauthorized" };
+                      // }
 
     // Continue processing even if JWT verification fails (during development)
     // Remove this behavior in production
@@ -82,7 +83,7 @@ export const handler: any = async (event: any) => {
         title: `Hello, ${userName}!`,
         appName: "W7Bot",
         description: "You sent the command: /hello",
-        notificationUrl: "https://yourdocs.example.com/hello-command",
+        notificationUrl: `https://${config.AWS_API_ENDPOINT_NAME}.${config.AWS_HOSTED_ZONE_NAME}/docs`,
       });
     } else {
       // Handle other commands if needed
@@ -90,7 +91,7 @@ export const handler: any = async (event: any) => {
         title: `Hello, ${userName}!`,
         appName: "W7Bot",
         description: `Sorry I don't know how to respond to: ${incomingText}`,
-        notificationUrl: "https://yourdocs.example.com/hello-command",
+        notificationUrl: `https://${config.AWS_API_ENDPOINT_NAME}.${config.AWS_HOSTED_ZONE_NAME}/docs`,
       });
     }
 

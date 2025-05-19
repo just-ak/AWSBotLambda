@@ -1,0 +1,154 @@
+{
+  "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+  "type": "AdaptiveCard",
+  "version": "1.4",
+  "body": [
+    {
+      "type": "Container",
+      "style": "emphasis",
+      "items": [
+        {
+          "type": "ColumnSet",
+          "columns": [
+            {
+              "type": "Column",
+              "width": "auto",
+              "items": [
+                {
+                  "type": "Image",
+                  "url": "https://cdn.jsdelivr.net/gh/adaptivecards/adaptivecards-assets/assets/microsoft.png",
+                  "size": "Small",
+                  "horizontalAlignment": "center"
+                }
+              ],
+              "verticalContentAlignment": "Center"
+            },
+            {
+              "type": "Column",
+              "width": "stretch",
+              "items": [
+                {
+                  "type": "TextBlock",
+                  "text": "${detail-type}",
+                  "size": "Large",
+                  "weight": "Bolder",
+                  "wrap": true,
+                  "color": "Accent"
+                },
+                {
+                  "type": "TextBlock",
+                  "text": "${source}",
+                  "isSubtle": true,
+                  "weight": "Bolder",
+                  "size": "Small",
+                  "spacing": "None"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "Container",
+      "style": "warning",
+      "items": [
+        {
+          "type": "TextBlock",
+          "text": "Operation: ${detail.operation}",
+          "weight": "Bolder"
+        }
+      ],
+      "bleed": true
+    },
+    {
+      "type": "FactSet",
+      "facts": [
+        {
+          "title": "Parameter Name:",
+          "value": "${detail.name}"
+        },
+        {
+          "title": "Type:",
+          "value": "${detail.type}"
+        },
+        {
+          "title": "Time:",
+          "value": "${time}"
+        },
+        {
+          "title": "Region:",
+          "value": "${region}"
+        },
+        {
+          "title": "Account:",
+          "value": "${account}"
+        }
+      ]
+    },
+    {
+      "type": "Container",
+      "style": "default",
+      "items": [
+        {
+          "type": "TextBlock",
+          "text": "Resource",
+          "weight": "Bolder"
+        },
+        {
+          "type": "TextBlock",
+          "text": "${resources}",
+          "wrap": true,
+          "size": "Small"
+        }
+      ]
+    },
+    {
+      "type": "Container",
+      "style": "attention",
+      "items": [
+        {
+          "type": "ColumnSet",
+          "columns": [
+            {
+              "type": "Column",
+              "width": "auto",
+              "items": [
+                {
+                  "type": "TextBlock",
+                  "text": "Event ID:",
+                  "weight": "Bolder",
+                  "size": "Small"
+                }
+              ]
+            },
+            {
+              "type": "Column",
+              "width": "stretch",
+              "items": [
+                {
+                  "type": "TextBlock",
+                  "text": "${id}",
+                  "size": "Small",
+                  "wrap": true
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "actions": [
+    {
+      "type": "Action.OpenUrl",
+      "title": "View in Console",
+      "url": "https://${region}.console.aws.amazon.com/systems-manager/parameters?region=${region}"
+    },
+    {
+      "type": "Action.OpenUrl",
+      "title": "View Documentation",
+      "url": "${notificationUrl}"
+    }
+  ]
+}

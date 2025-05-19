@@ -1,0 +1,111 @@
+{
+  "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+  "type": "AdaptiveCard",
+  "version": "1.4",
+  "body": [
+    {
+      "type": "TextBlock",
+      "text": "${title}",
+      "size": "Large",
+      "weight": "Bolder",
+      "wrap": true
+    },
+    {
+      "type": "TextBlock",
+      "text": "${appName}",
+      "isSubtle": true,
+      "color": "Accent",
+      "weight": "Bolder",
+      "size": "Small",
+      "spacing": "None"
+    },
+    {
+      "type": "TextBlock",
+      "text": "${description}",
+      "isSubtle": true,
+      "wrap": true
+    },
+    {
+      "type": "FactSet",
+      "facts": [
+        {
+          "title": "Event Type:",
+          "value": "${detail-type}"
+        },
+        {
+          "title": "Source:",
+          "value": "${source}"
+        },
+        {
+          "title": "Time:",
+          "value": "${time}"
+        },
+        {
+          "title": "Region:",
+          "value": "${region}"
+        },
+        {
+          "title": "Account:",
+          "value": "${account}"
+        }
+      ]
+    },
+    {
+      "type": "Container",
+      "items": [
+        {
+          "type": "TextBlock",
+          "text": "Event Details",
+          "weight": "Bolder",
+          "size": "Medium",
+          "wrap": true
+        },
+        {
+          "type": "FactSet",
+          "facts": [
+            {
+              "title": "Name:",
+              "value": "${detail.name}"
+            },
+            {
+              "title": "Type:",
+              "value": "${detail.type}"
+            },
+            {
+              "title": "Status:",
+              "value": "${detail.status}"
+            }
+          ]
+        }
+      ],
+      "style": "emphasis",
+      "spacing": "Medium"
+    },
+    {
+      "type": "Container",
+      "items": [
+        {
+          "type": "TextBlock",
+          "text": "Resources",
+          "weight": "Bolder",
+          "size": "Medium",
+          "wrap": true
+        },
+        {
+          "type": "TextBlock",
+          "text": "${resources}",
+          "wrap": true
+        }
+      ],
+      "style": "accent",
+      "spacing": "Small"
+    }
+  ],
+  "actions": [
+    {
+      "type": "Action.OpenUrl",
+      "title": "View in Console",
+      "url": "${notificationUrl}"
+    }
+  ]
+}

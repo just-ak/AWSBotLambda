@@ -8,6 +8,8 @@ import { HealthEventConversations } from "./dynamoDb/healthEventConversions";
 import { EventBridgeRules } from "./eventBridge/rules";
 import { EndPointApiGateway } from "./apiGateway/endPointApiGateway";
 import { Route53EndPoint } from "./route53/endPoint";
+import { DocumentationBucket } from "./s3/documentation";
+import { DocsEndpoint } from "./apiGateway/docsEndpoint";
 
 
 export class Notifications extends Stack {
@@ -27,6 +29,9 @@ export class Notifications extends Stack {
       topic: snsTopic.topic,
       table: messageDeduplicationTable,
     });
+    new EventBridgeRules(this, 'EventBridgeRule', {
+      targetLambda: messageReducer.lambda,
+    });
 
     const healthEventConversations = new HealthEventConversations(this, 'HealthEventConversations', {
     });
@@ -36,9 +41,7 @@ export class Notifications extends Stack {
       table: healthEventConversations.table,
     });
 
-    new EventBridgeRules(this, 'EventBridgeRule', {
-      targetLambda: messageReducer.lambda,
-    });
+ 
 
     const endPointApiGateway = new EndPointApiGateway(this, 'EndPointApiGateway', {
       postLambda: adaptiveBot.lambda,
@@ -48,8 +51,18 @@ export class Notifications extends Stack {
       api: endPointApiGateway.api,
     });
 
+    // Create the documentation bucket with public access disabled
+    const docsBucket = new DocumentationBucket(this, 'DocumentationBucket', {
+      enableDirectAccess: false, // Access only through API Gateway
+    });
 
 
+    // Add the docs endpoint to the API Gateway
+    new DocsEndpoint(this, 'DocsEndpoint', {
+      api: endPointApiGateway.api,
+      bucket: docsBucket.bucket,
+      accessRole: docsBucket.accessRole,
+    });
 
   }
 

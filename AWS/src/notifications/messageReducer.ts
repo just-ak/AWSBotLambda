@@ -2,15 +2,17 @@ import { DynamoDBClient, GetItemCommand, PutItemCommand } from '@aws-sdk/client-
 import { Callback, Context, Handler } from 'aws-lambda';
 import { SNSClient, PublishCommand } from '@aws-sdk/client-sns';
 import { createHash } from 'crypto';
-import { msTeamsHandler } from './msTeams';
+// import { msTeamsHandler } from './msTeams';
 
-const dynamoDbClient = new DynamoDBClient({ region: `eu-west-1` });
+const dynamoDbClient = new DynamoDBClient({ });
 const TABLE_NAME = process.env.dynamoDb;
 const SNS_TOPIC_ARN = process.env.SNS_TOPIC_ARN;
 
 // Define the JSON document specifying fields to remove per event type
 const FIELD_REMOVAL_RULES: Record<string, string[]> = {
-  'aws.ssm': ['version', 'id', 'time'],
+  'aws.ssm': ['version', 'id', 
+    //'time'
+     ],
 };
 
 //eslint-disable-next-line
@@ -31,23 +33,25 @@ export const handler: Handler = async (event: any, context: Context, callback: C
     // continue;
   } else {
     // Store the UUID in DynamoDB to mark it as processed
-    const messageID = await msTeamsHandler(event);
+    // const messageID = await msTeamsHandler(event);
 
-    event.msTeamsMessageId = messageID;
+    // event.msTeamsMessageId = messageID;
     await storeInDynamoDB(uniqueIdentifier, event);
 
     // Process the message (implement your own processing logic)
     console.log(`Processing event type: ${eventType} with ID: ${uniqueIdentifier}`);
     event.detail.name = `${event.detail.name}`;
+    event.dynamoDBUUID = uniqueIdentifier;
 
     const command = new PublishCommand({
       Message: JSON.stringify(event),
       TopicArn: SNS_TOPIC_ARN,
     });
     try {
-      const config = { region: 'eu-west-1' };
+      const config = {  };
       const client = new SNSClient(config);
       await client.send(command);
+      console.log(`Message sent to SNS topic: ${SNS_TOPIC_ARN}`);
     } catch (error) {
       console.error('Error publishing message to SNS', error);
     }
