@@ -1,8 +1,8 @@
 import { startNewConversation, storeInDynamoDB } from "./conversation";
-import { getBotToken } from "./lib/getBotToken";
-import { config } from "./internal/config";
-import { renderAdaptiveCard } from "./lib/renderAdaptiveCard";
-import { sendAdaptiveCard } from "./lib/sendAdaptiveCard";
+import { getBotToken } from "./getBotToken";
+import { config } from "../internal/config";
+import { renderAdaptiveCard } from "./renderAdaptiveCard";
+import { sendAdaptiveCard } from "./sendAdaptiveCard";
 
 const ASSETS =`https://${config.AWS_API_ENDPOINT_NAME}.${config.AWS_HOSTED_ZONE_NAME}/docs/assets`;
 // Factory function to create appropriate card data based on event source
@@ -66,25 +66,53 @@ export async function processSNSMessage(event: SNSMessage): Promise<void> {
 
     if (parsedEvent.dynamoDBUUIDConversationId != 'unknown' ) { 
         console.log('Continuing conversation with:', parsedEvent.dynamoDBUUIDUserId);
+        console.log('Previous activity ID:', parsedEvent.dynamoDBUUIDActivityId || 'none');
 
         const cardData = createCardDataForEvent(parsedEvent);
         const adaptiveCard = renderAdaptiveCard(cardData);
 
-        await sendAdaptiveCard(serviceUrl, parsedEvent.dynamoDBUUIDConversationId, adaptiveCard, botToken);
+        try {
+            // Pass the previous activity ID to link cards in the conversation
+            const activityId = await sendAdaptiveCard(
+                serviceUrl, 
+                parsedEvent.dynamoDBUUIDConversationId, 
+                adaptiveCard, 
+                botToken,
+                undefined, // Used for Updating the original card
+                parsedEvent.dynamoDBUUIDActivityId
+            );
+            parsedEvent.dynamoDBUUIDActivityId = activityId;
+            console.log('New activity ID created:', activityId);
+            await storeInDynamoDB(parsedEvent.dynamoDBUUID, parsedEvent);
+        } catch (error) {
+            console.error('Error sending adaptive card:', error);
+            throw error; // Re-throw to handle at higher level if needed
+        }
     } else {
         // console.log('No existing conversation found. Starting new conversation...');
-        const conversationId = await startNewConversation(serviceUrl, parsedEvent.dynamoDBUUIDUserId, botToken);
-        // console.log('New conversation ID:', conversationId);
-        parsedEvent.dynamoDBUUIDConversationId = conversationId
+        let conversationId;
+        try {
+            conversationId = await startNewConversation(serviceUrl, parsedEvent.dynamoDBUUIDUserId, botToken);
+            console.log('New conversation ID:', conversationId);
+            parsedEvent.dynamoDBUUIDConversationId = conversationId;
 
-        console.log('Storing event in DynamoDB with conversation ID:', JSON.stringify(parsedEvent, null, 2));
-        const cardData = createCardDataForEvent(parsedEvent);
-        const adaptiveCard = renderAdaptiveCard(cardData);
-        // console.log('Adaptive Card:', JSON.stringify(adaptiveCard, null, 2));
-        const activityId = await sendAdaptiveCard(serviceUrl, parsedEvent.dynamoDBUUIDConversationId , adaptiveCard, botToken,  parsedEvent.dynamoDBUUIDActivityId || undefined);
-        parsedEvent.dynamoDBUUIDActivityId = activityId;
-        console.log('Activity ID:', activityId);
-        await storeInDynamoDB(parsedEvent.dynamoDBUUID, parsedEvent);
-
+            const cardData = createCardDataForEvent(parsedEvent);
+            const adaptiveCard = renderAdaptiveCard(cardData);
+            
+            const activityId = await sendAdaptiveCard(
+                serviceUrl, 
+                parsedEvent.dynamoDBUUIDConversationId, 
+                adaptiveCard, 
+                botToken,
+                undefined,// First message in conversation, no previous activity ID
+                undefined // Used for Replying the original card
+            );
+            parsedEvent.dynamoDBUUIDActivityId = activityId;
+            console.log('New activity ID created:', activityId);
+            await storeInDynamoDB(parsedEvent.dynamoDBUUID, parsedEvent);
+        } catch (error) {
+            console.error('Error in starting conversation or sending card:', error);
+            throw error;
+        }
     }
 }

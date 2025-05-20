@@ -5,7 +5,8 @@ export async function sendAdaptiveCard(
   conversationId: string,
   adaptiveCardBody: Record<string, any>,
   token: string,
-  activityId?: string
+  activityId?: string,
+  replyToId?: string,
 ): Promise<string> {
   const postData = JSON.stringify({
     type: "message",
@@ -15,6 +16,8 @@ export async function sendAdaptiveCard(
         content: adaptiveCardBody,
       },
     ],
+    // Include replyToId if provided to create a threaded reply
+    ...(replyToId && { replyToId: replyToId }),
   });
 
   // Construct URL based on whether we're updating or sending a new card
@@ -26,12 +29,14 @@ export async function sendAdaptiveCard(
     urlPath = `/v3/conversations/${conversationId}/activities/${activityId}`;
     method = 'PUT';
   } else {
-    // Sending a new card
+    //Sending a new card or replying to an existing card
     urlPath = `/v3/conversations/${conversationId}/activities`;
     method = 'POST';
   }
 
   const url = new URL(`${serviceUrl}${urlPath}`);
+
+  console.log(`Sending card with method: ${method}, ${postData}`);
 
   const options = {
     hostname: url.hostname,

@@ -1,4 +1,4 @@
-import { config } from "./internal/config";
+import { config } from "../internal/config";
 // import DynamoDB from 'aws-sdk/clients/dynamodb';
 import https from 'https';
 import { DynamoDBClient, GetItemCommand, PutItemCommand } from '@aws-sdk/client-dynamodb';

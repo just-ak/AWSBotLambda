@@ -1,0 +1,152 @@
+{
+  "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+  "type": "AdaptiveCard",
+  "version": "1.4",
+  "body": [
+    {
+      "type": "TextBlock",
+      "text": "${title}",
+      "size": "Large",
+      "weight": "Bolder",
+      "wrap": true
+    },
+    {
+      "type": "TextBlock",
+      "text": "${appName}",
+      "isSubtle": true,
+      "color": "Accent",
+      "weight": "Bolder",
+      "size": "Small",
+      "spacing": "None"
+    },
+    {
+      "type": "TextBlock",
+      "text": "${description}",
+      "isSubtle": true,
+      "wrap": true
+    },
+    {
+      "type": "Container",
+      "items": [
+        {
+          "type": "TextBlock",
+          "text": "User Information",
+          "weight": "Bolder",
+          "size": "Medium",
+          "wrap": true
+        },
+        {
+          "type": "FactSet",
+          "facts": [
+            {
+              "title": "User ID:",
+              "value": "${userId}"
+            },
+            {
+              "title": "User Name:",
+              "value": "${userName}"
+            },
+            {
+              "title": "AAD Object ID:",
+              "value": "${aadObjectId}"
+            }
+          ]
+        }
+      ],
+      "style": "emphasis",
+      "spacing": "Medium"
+    },
+    {
+      "type": "Container",
+      "items": [
+        {
+          "type": "TextBlock",
+          "text": "Conversation Information",
+          "weight": "Bolder",
+          "size": "Medium",
+          "wrap": true
+        },
+        {
+          "type": "FactSet",
+          "facts": [
+            {
+              "title": "Conversation ID:",
+              "value": "${conversationId}"
+            },
+            {
+              "title": "Conversation Type:",
+              "value": "${conversationType}"
+            },
+            {
+              "title": "Tenant ID:",
+              "value": "${tenantId}"
+            }
+          ]
+        }
+      ],
+      "style": "accent",
+      "spacing": "Small"
+    },
+    {
+      "type": "Container",
+      "items": [
+        {
+          "type": "TextBlock",
+          "text": "Channel Information",
+          "weight": "Bolder",
+          "size": "Medium",
+          "wrap": true
+        },
+        {
+          "type": "FactSet",
+          "facts": [
+            {
+              "title": "Channel ID:",
+              "value": "${channelId}"
+            },
+            {
+              "title": "Service URL:",
+              "value": "${serviceUrl}"
+            }
+          ]
+        }
+      ],
+      "style": "good",
+      "spacing": "Small"
+    },
+    {
+      "type": "Container",
+      "items": [
+        {
+          "type": "TextBlock",
+          "text": "Locale & Timezone",
+          "weight": "Bolder",
+          "size": "Medium", 
+          "wrap": true
+        },
+        {
+          "type": "FactSet",
+          "facts": [
+            {
+              "title": "Locale:",
+              "value": "${locale}"
+            },
+            {
+              "title": "Timezone:",
+              "value": "${timezone}"
+            }
+          ]
+        }
+      ],
+      "style": "warning",
+      "spacing": "Small"
+    }
+  ],
+  "actions": [
+    {
+      "type": "Action.OpenUrl",
+      "title": "View Documentation",
+      "url": "${notificationUrl}"
+    }
+  ]
+}

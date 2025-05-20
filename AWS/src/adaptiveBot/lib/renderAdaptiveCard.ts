@@ -1,13 +1,15 @@
 import genericCard from '../adaptiveCards/generic-card.json';
 import ssmCard from '../adaptiveCards/ssm-card.json'; 
+import echoCard from '../adaptiveCards/echo-card.json'; 
+import helloCard from '../adaptiveCards/hello-card.json';
 
 
 // Card template registry
 const cardTemplates: { [key: string]: any } = {
   'generic-card': genericCard,
   'ssm-card': ssmCard, 
-  // Add other templates to the registry as needed
-  // 'other-template': otherCardTemplate,
+  'echo-card': echoCard,
+  'hello-card': helloCard,
 };
 
 /**
@@ -59,5 +61,7 @@ export function renderAdaptiveCard(data: any): any {
   }
 
   replacePlaceholders(card);
+
+  
   return card;
 }

@@ -1,0 +1,99 @@
+{
+  "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+  "type": "AdaptiveCard",
+  "version": "1.5",
+  "body": [
+    {
+      "type": "Container",
+      "style": "emphasis",
+      "items": [
+        {
+          "type": "ColumnSet",
+          "columns": [
+            {
+              "type": "Column",
+              "width": "auto",
+              "items": [
+                {
+                  "type": "Image",
+                  "url": "https://adaptive-cards.io/content/cats/1.png",
+                  "size": "small",
+                  "style": "person",
+                  "altText": "Bot Avatar"
+                }
+              ],
+              "verticalContentAlignment": "center"
+            },
+            {
+              "type": "Column",
+              "width": "stretch",
+              "items": [
+                {
+                  "type": "TextBlock",
+                  "text": "${title}",
+                  "size": "large",
+                  "weight": "bolder",
+                  "wrap": true,
+                  "style": "heading"
+                },
+                {
+                  "type": "TextBlock",
+                  "text": "${appName}",
+                  "isSubtle": true,
+                  "spacing": "none",
+                  "wrap": true
+                }
+              ],
+              "verticalContentAlignment": "center"
+            }
+          ]
+        }
+      ],
+      "bleed": true
+    },
+    {
+      "type": "Container",
+      "items": [
+        {
+          "type": "TextBlock",
+          "text": "${description}",
+          "wrap": true
+        },
+        {
+          "type": "TextBlock",
+          "text": "I'm here to assist you with information and commands. Feel free to ask me questions or try out some commands!",
+          "wrap": true,
+          "spacing": "medium"
+        }
+      ],
+      "spacing": "medium"
+    },
+    {
+      "type": "Container",
+      "items": [
+        {
+          "type": "FactSet",
+          "facts": [
+            {
+              "title": "Available Commands",
+              "value": "/hello - Get this welcome message"
+            },
+            {
+              "title": "",
+              "value": "/echo - See details about your request"
+            }
+          ]
+        }
+      ],
+      "spacing": "medium"
+    }
+  ],
+  "actions": [
+    {
+      "type": "Action.OpenUrl",
+      "title": "View Documentation",
+      "url": "${notificationUrl}",
+      "style": "positive"
+    }
+  ]
+}
