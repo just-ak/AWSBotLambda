@@ -57,7 +57,6 @@ export const handler: any = async (event: any) => {
       const tenantId = body.conversation?.tenantId || body.channelData?.tenant?.id || "Not available";
       const channelId = body.channelId || "Not available";
       const locale = body.locale || "Not available";
-
       const timezone = body.localTimezone || body.entities?.find((e: { type: string; }) => e.type === "clientInfo")?.timezone || "Not available";
 
       adaptiveCard = renderAdaptiveCard({

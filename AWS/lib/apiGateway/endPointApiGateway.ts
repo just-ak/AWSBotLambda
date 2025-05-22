@@ -1,12 +1,15 @@
 import { Construct } from 'constructs';
 import { ApiGateWayLogs } from '../cloudWatch/apiGateWayLogs';
-import { RestApi, LogGroupLogDestination, AccessLogFormat, MethodLoggingLevel, RequestAuthorizer, LambdaIntegration, Period, CfnRestApi } from 'aws-cdk-lib/aws-apigateway';
+import { RestApi, LogGroupLogDestination, AccessLogFormat, MethodLoggingLevel, RequestAuthorizer, LambdaIntegration, Period, CfnRestApi, ContentHandling } from 'aws-cdk-lib/aws-apigateway';
 import { Role, ServicePrincipal, ManagedPolicy } from 'aws-cdk-lib/aws-iam';
 import { Authorizer } from '../lambda/authorizer';
 import { Duration } from 'aws-cdk-lib';
 import { IFunction } from 'aws-cdk-lib/aws-lambda';
 
+
 export interface EndPointApiGatewayProps {
+  // assetsBucket: Bucket;
+  // documentationBucket: Bucket
   postLambda: IFunction;
 }
 
@@ -29,7 +32,7 @@ export class EndPointApiGateway extends Construct {
     this.api = new RestApi(this, 'notificationsApi', {
       restApiName: 'Notifications Service',
       description: 'This service handles notifications.',
-
+      // binaryMediaTypes: ['image/png', 'image/jpeg'],
       deployOptions: {
         accessLogDestination: new LogGroupLogDestination(apiGateWayLogs.logGroup),
         accessLogFormat: AccessLogFormat.jsonWithStandardFields(),
@@ -45,6 +48,16 @@ export class EndPointApiGateway extends Construct {
       validateRequestParameters: true,
     });
 
+
+    // const proxyLambda = new ProxyLambda(this, 'messageReducerLambda', {
+    //   bucket: props.bucket
+    // });
+
+    // const lambdaIntegration = new LambdaIntegration(proxyLambda.lambda, {
+    //   proxy: true,
+    //   contentHandling: ContentHandling.CONVERT_TO_BINARY,
+    // });
+    // this.api.root.addResource('{proxy+}').addMethod('GET', lambdaIntegration);
 
     const adaptiveBotAPI = new LambdaIntegration(props.postLambda);
 

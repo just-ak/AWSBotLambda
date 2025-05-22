@@ -4,7 +4,7 @@ import { config } from "../internal/config";
 import { renderAdaptiveCard } from "./renderAdaptiveCard";
 import { sendAdaptiveCard } from "./sendAdaptiveCard";
 
-const ASSETS =`https://${config.AWS_API_ENDPOINT_NAME}.${config.AWS_HOSTED_ZONE_NAME}/docs/assets`;
+const ASSETS =`https://${config.AWS_API_ENDPOINT_NAME}.${config.AWS_HOSTED_ZONE_NAME}/assets`;
 // Factory function to create appropriate card data based on event source
 function createCardDataForEvent(parsedEvent: GenericEvent): any {
     // Determine the event source and return appropriate card data

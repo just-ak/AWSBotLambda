@@ -17,26 +17,33 @@ export async function sendAdaptiveCard(
       },
     ],
     // Include replyToId if provided to create a threaded reply
-    ...(replyToId && { replyToId: replyToId }),
+    //...(replyToId && { replyToId: replyToId }),
   });
 
   // Construct URL based on whether we're updating or sending a new card
   let urlPath: string;
   let method: string;
   
-  if (activityId) {
+  if (replyToId) {
+    console.log('Replying to existing card with ID:', replyToId);
+    // Reply to an existing card
+    urlPath = `/v3/conversations/${conversationId}/activities/${replyToId}`;
+    method = 'POST';
+  } else if (activityId) {
+    console.log('Updating existing card with ID:', activityId);
     // Updating an existing card
     urlPath = `/v3/conversations/${conversationId}/activities/${activityId}`;
     method = 'PUT';
   } else {
+    console.log('Sending new card to conversation:', conversationId);
     //Sending a new card or replying to an existing card
     urlPath = `/v3/conversations/${conversationId}/activities`;
     method = 'POST';
   }
 
   const url = new URL(`${serviceUrl}${urlPath}`);
-
-  console.log(`Sending card with method: ${method}, ${postData}`);
+  console.log('Service URL:', serviceUrl);
+  console.log(`Sending card with method: ${url.hostname} ${method}, ${postData}`);
 
   const options = {
     hostname: url.hostname,
@@ -45,7 +52,7 @@ export async function sendAdaptiveCard(
     headers: {
       'Authorization': `Bearer ${token}`,
       'Content-Type': 'application/json',
-      'Content-Length': Buffer.byteLength(postData),
+     'Content-Length': Buffer.byteLength(postData),
     },
   };
 
