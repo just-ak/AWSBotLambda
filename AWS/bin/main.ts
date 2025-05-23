@@ -14,6 +14,6 @@ const certStack = new CertificateStack(app, 'ops-certificates', {
  });
  
  // Add dependencies if necessary
-mainStack.addDependency(certStack);
+// mainStack.addDependency(certStack);
 
 app.synth();

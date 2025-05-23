@@ -17,31 +17,32 @@ export interface RootCloudProps {
 
 export class RootCloud extends Construct {
   public readonly distribution: cloudfront.Distribution;
-  
+
   constructor(scope: Construct, id: string, props: RootCloudProps) {
     super(scope, id);
-    
+
     const oai = new cloudfront.OriginAccessIdentity(this, 'CloudFrontOAI', {
       comment: 'Allow CloudFront to access S3 buckets'
     });
-    
+
     props.contentBucket.grantRead(oai.grantPrincipal);
     props.assetBucket.grantRead(oai.grantPrincipal);
     const apiGatewayOrigin = new origins.RestApiOrigin(props.apiGateway, {
       customHeaders: {
         'x-origin': 'cloudfront'
-      }
+      },
+      originPath: '/'
     });
-    
+
     const contentBucketOrigin = new origins.S3Origin(props.contentBucket, {
       originAccessIdentity: oai
     });
-    
+
     const assetsOrigin = new origins.S3Origin(props.assetBucket, {
       originAccessIdentity: oai,
-      originPath: '/', 
+      originPath: '/',
     });
-    
+
     // Create cache policies
     const apiCachePolicy = new cloudfront.CachePolicy(this, 'ApiCachePolicy', {
       defaultTtl: cdk.Duration.seconds(0),
@@ -53,7 +54,7 @@ export class RootCloud extends Construct {
       queryStringBehavior: cloudfront.CacheQueryStringBehavior.all(),
       cookieBehavior: cloudfront.CacheCookieBehavior.none(),
     });
-    
+
     // Common security headers
     const responseHeadersPolicy = new cloudfront.ResponseHeadersPolicy(this, 'SecurityHeadersPolicy', {
       responseHeadersPolicyName: 'SecurityHeadersPolicy',
@@ -86,23 +87,15 @@ export class RootCloud extends Construct {
         },
       },
     });
-    
-    // Get the certificate from SSM Parameter in us-east-1
-    // const certificateArn = ssm.StringParameter.valueForStringParameter(
-    //   this, 
-    //   props.certificateParameterName,
-    // );
-    
+
     // Get the certificate from its ARN
     const certificate = acm.Certificate.fromCertificateArn(
-      this, 'Certificate', 
+      this, 'Certificate',
       ssm.StringParameter.valueForStringParameter(
-      this,
-      '/certificates/cloudfront/sslCertificateArn',
-    )
-    //'arn:aws:acm:us-east-1:637423421432:certificate/7a8e61c5-cb5d-48be-9b87-5f7d2e3df911'
+        this,
+        '/certificates/cloudfront/sslCertificateArn',
+      )
     );
-    
 
     // Create the CloudFront distribution
     this.distribution = new cloudfront.Distribution(this, 'Distribution', {
@@ -115,22 +108,23 @@ export class RootCloud extends Construct {
         responseHeadersPolicy,
       },
       additionalBehaviors: {
-        '/prod/*': {
+        '/prod': {
           origin: apiGatewayOrigin,
           viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.HTTPS_ONLY,
           allowedMethods: cloudfront.AllowedMethods.ALLOW_ALL,
           cachePolicy: apiCachePolicy,
           responseHeadersPolicy,
-          originRequestPolicy: cloudfront.OriginRequestPolicy.ALL_VIEWER_EXCEPT_HOST_HEADER,
+          //originRequestPolicy: apiGatewayRequestPolicy,
+                   originRequestPolicy: cloudfront.OriginRequestPolicy.ALL_VIEWER,
         },
       },
       priceClass: cloudfront.PriceClass.PRICE_CLASS_100,
       enableIpv6: true,
       httpVersion: cloudfront.HttpVersion.HTTP2_AND_3,
       domainNames: props.domainNames, // Add the alternate domain names
-     certificate: certificate, // Add the ACM certificate for HTTPS
+      certificate: certificate, // Add the ACM certificate for HTTPS
     });
-    
+
     // Create a custom origin request policy for assets
     const assetsRequestPolicy = new cloudfront.OriginRequestPolicy(this, 'AssetsRequestPolicy', {
       originRequestPolicyName: 'AssetsRequestPolicy',
@@ -138,7 +132,7 @@ export class RootCloud extends Construct {
       queryStringBehavior: cloudfront.OriginRequestQueryStringBehavior.all(),
       cookieBehavior: cloudfront.OriginRequestCookieBehavior.none(),
     });
-    
+
     const pathPattern = `/assets/*`;
     this.distribution.addBehavior(pathPattern, assetsOrigin, {
       viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
@@ -146,6 +140,6 @@ export class RootCloud extends Construct {
       cachePolicy: cloudfront.CachePolicy.CACHING_OPTIMIZED,
       responseHeadersPolicy,
       originRequestPolicy: assetsRequestPolicy,
-    });  
+    });
   }
 }

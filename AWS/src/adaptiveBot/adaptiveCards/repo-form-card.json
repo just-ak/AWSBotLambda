@@ -1,0 +1,66 @@
+{
+  "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+  "type": "AdaptiveCard",
+  "version": "1.3",
+  "body": [
+    {
+      "type": "TextBlock",
+      "size": "Medium",
+      "weight": "Bolder",
+      "text": "${title}"
+    },
+    {
+      "type": "TextBlock",
+      "text": "${description}",
+      "wrap": true
+    },
+    {
+      "type": "Input.Text",
+      "id": "repoName",
+      "label": "Repository Name",
+      "placeholder": "Enter repository name",
+      "isRequired": true
+    },
+    {
+      "type": "Input.Text",
+      "id": "repoDescription",
+      "label": "Description",
+      "placeholder": "Enter repository description",
+      "isMultiline": true
+    },
+    {
+      "type": "Input.ChoiceSet",
+      "id": "visibility",
+      "label": "Visibility",
+      "style": "expanded",
+      "value": "public",
+      "choices": [
+        {
+          "title": "Public",
+          "value": "public"
+        },
+        {
+          "title": "Private",
+          "value": "private"
+        }
+      ]
+    },
+    {
+      "type": "Input.Toggle",
+      "id": "initializeReadme",
+      "title": "Initialize with README",
+      "value": "true"
+    }
+  ],
+  "actions": [
+    {
+      "type": "Action.Submit",
+      "title": "Create Repository",
+      "data": {
+        "actionType": "createRepo",
+        "serviceUrl": "${formData.serviceUrl}",
+        "conversationId": "${formData.conversationId}"
+      }
+    }
+  ]
+}

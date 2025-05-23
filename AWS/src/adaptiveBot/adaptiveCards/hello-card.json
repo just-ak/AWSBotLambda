@@ -16,7 +16,7 @@
               "items": [
                 {
                   "type": "Image",
-                  "url": "https://adaptive-cards.io/content/cats/1.png",
+                  "url": "${logo}",
                   "size": "small",
                   "style": "person",
                   "altText": "Bot Avatar"

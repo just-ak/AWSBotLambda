@@ -59,9 +59,6 @@ export class Notifications extends Stack {
       postLambda: adaptiveBot.lambda,
     });
 
-    // const sslCertificates = new SslCertificates(this, 'SslCertificates', {
-    // });
-
     const rootCloud = new RootCloud(this, 'RootCloud', {
       apiGateway: endPointApiGateway.api,
       contentBucket: docsBucket.bucket,
