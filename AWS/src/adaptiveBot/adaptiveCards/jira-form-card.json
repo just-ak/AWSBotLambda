@@ -1,0 +1,98 @@
+{
+  "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+    "type": "AdaptiveCard",
+      "version": "1.5",
+        "body": [
+          {
+            "type": "TextBlock",
+            "size": "Medium",
+            "weight": "Bolder",
+            "text": "Create JIRA Ticket"
+          },
+          {
+            "type": "Input.Text",
+            "id": "summary",
+            "label": "Summary",
+            "placeholder": "Enter ticket summary",
+            "isRequired": true
+          },
+          {
+            "type": "Input.Text",
+            "id": "description",
+            "label": "Description",
+            "placeholder": "Enter ticket description",
+            "isMultiline": true,
+            "isRequired": true
+          },
+          {
+            "type": "Input.ChoiceSet",
+            "id": "issueType",
+            "label": "Issue Type",
+            "isRequired": true,
+            "choices": [
+              {
+                "title": "Bug",
+                "value": "Bug"
+              },
+              {
+                "title": "Task",
+                "value": "Task"
+              },
+              {
+                "title": "Story",
+                "value": "Story"
+              },
+              {
+                "title": "Epic",
+                "value": "Epic"
+              }
+            ],
+            "value": "Task"
+          },
+          {
+            "type": "Input.ChoiceSet",
+            "id": "priority",
+            "label": "Priority",
+            "choices": [
+              {
+                "title": "Highest",
+                "value": "5"
+              },
+              {
+                "title": "High",
+                "value": "4"
+              },
+              {
+                "title": "Medium",
+                "value": "3"
+              },
+              {
+                "title": "Low",
+                "value": "2"
+              },
+              {
+                "title": "Lowest",
+                "value": "1"
+              }
+            ],
+            "value": "Medium"
+          },
+          {
+            "type": "Input.Text",
+            "id": "labels",
+            "label": "Labels (comma separated)",
+            "placeholder": "e.g., aws,lambda,bot"
+          }
+        ],
+          "actions": [
+            {
+              "type": "Action.Submit",
+              "title": "Create Ticket",
+              "data": {
+                "actionType": "createJiraTicket",
+                "serviceUrl": "${formData.serviceUrl}",
+                "conversationId": "${formData.conversationId}"
+              }
+            }
+          ]
+}

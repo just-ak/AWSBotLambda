@@ -1,19 +1,27 @@
-import genericCard from '../adaptiveCards/generic-card.json';
-import ssmCard from '../adaptiveCards/ssm-card.json'; 
-import echoCard from '../adaptiveCards/echo-card.json'; 
-import helloCard from '../adaptiveCards/hello-card.json';
-import confirmationCard from '../adaptiveCards/confirmation-card.json';
-import repoFormCard from '../adaptiveCards/repo-form-card.json';
 
+import confirmationCard from '../adaptiveCards/confirmation-card.json';
+import confluenceFormCard from '../adaptiveCards/confluence-form-card.json';
+import echoCard from '../adaptiveCards/echo-card.json'; 
+import genericCard from '../adaptiveCards/generic-card.json';
+import healthNotificationCard from '../adaptiveCards/health-notification-card.json';
+import helloCard from '../adaptiveCards/hello-card.json';
+import jiraFormCard from '../adaptiveCards/jira-form-card.json';
+import repoFormCard from '../adaptiveCards/repo-form-card.json';
+import ssmCard from '../adaptiveCards/ssm-card.json'; 
+import pagerDutyCard from '../adaptiveCards/pagerduty-form-card.json';
 
 // Card template registry
 const cardTemplates: { [key: string]: any } = {
-  'generic-card': genericCard,
-  'ssm-card': ssmCard, 
-  'echo-card': echoCard,
-  'hello-card': helloCard,
   'confirmation-card': confirmationCard,
+  'confluence-form-card': confluenceFormCard,
+  'echo-card': echoCard,
+  'generic-card': genericCard,
+  'health-notification-card': healthNotificationCard,
+  'hello-card': helloCard,
+  'jira-form-card': jiraFormCard,
   'repo-form-card': repoFormCard,
+  'ssm-card': ssmCard, 
+  'pagerduty-form-card': pagerDutyCard
 };
 
 /**

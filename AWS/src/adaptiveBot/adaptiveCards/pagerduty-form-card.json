@@ -1,0 +1,96 @@
+{
+  "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+    "type": "AdaptiveCard",
+      "version": "1.5",
+        "body": [
+          {
+            "type": "TextBlock",
+            "size": "Medium",
+            "weight": "Bolder",
+            "text": "Create PagerDuty Incident"
+          },
+          {
+            "type": "Input.Text",
+            "id": "title",
+            "label": "Title",
+            "placeholder": "Enter incident title",
+            "isRequired": true
+          },
+          {
+            "type": "Input.Text",
+            "id": "description",
+            "label": "Description",
+            "placeholder": "Enter incident description",
+            "isMultiline": true,
+            "isRequired": true
+          },
+          {
+            "type": "Input.Text",
+            "id": "serviceId",
+            "label": "Service ID",
+            "placeholder": "Enter PagerDuty service ID",
+            "isRequired": true
+          },
+          {
+            "type": "Input.ChoiceSet",
+            "id": "urgency",
+            "label": "Urgency",
+            "choices": [
+              {
+                "title": "High",
+                "value": "high"
+              },
+              {
+                "title": "Low",
+                "value": "low"
+              }
+            ],
+            "value": "low"
+          },
+          {
+            "type": "Input.ChoiceSet",
+            "id": "priority",
+            "label": "Priority",
+            "choices": [
+              {
+                "title": "P1 - Critical",
+                "value": "P1"
+              },
+              {
+                "title": "P2 - High",
+                "value": "P2"
+              },
+              {
+                "title": "P3 - Moderate",
+                "value": "P3"
+              },
+              {
+                "title": "P4 - Low",
+                "value": "P4"
+              },
+              {
+                "title": "P5 - Informational",
+                "value": "P5"
+              }
+            ],
+            "value": "P3"
+          },
+          {
+            "type": "Input.Text",
+            "id": "assigneeId",
+            "label": "Assignee ID (optional)",
+            "placeholder": "Enter PagerDuty user ID"
+          }
+        ],
+          "actions": [
+            {
+              "type": "Action.Submit",
+              "title": "Create Incident",
+              "data": {
+                "actionType": "createPagerDutyIncident",
+                "serviceUrl": "${formData.serviceUrl}",
+                "conversationId": "${formData.conversationId}"
+              }
+            }
+          ]
+}

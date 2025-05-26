@@ -1,0 +1,54 @@
+{
+  "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+  "type": "AdaptiveCard",
+  "version": "1.4",
+  "body": [
+    {
+      "type": "TextBlock",
+      "text": "Create a New Confluence Page",
+      "weight": "Bolder",
+      "size": "Medium"
+    },
+    {
+      "type": "TextBlock",
+      "text": "Please fill in the details for your new Confluence page:",
+      "wrap": true
+    },
+    {
+      "type": "Input.Text",
+      "id": "title",
+      "placeholder": "Page Title",
+      "label": "Title",
+      "isRequired": true,
+      "errorMessage": "Title is required."
+    },
+    {
+      "type": "Input.Text",
+      "id": "description",
+      "placeholder": "Page Content (HTML or plain text)",
+      "label": "Description",
+      "isMultiline": true,
+      "isRequired": true,
+      "errorMessage": "Description is required."
+    },
+    {
+      "type": "Input.Text",
+      "id": "location",
+      "placeholder": "Space Key (e.g., 'DEV')",
+      "label": "Space Key",
+      "isRequired": true,
+      "errorMessage": "Space Key is required."
+    }
+  ],
+  "actions": [
+    {
+      "type": "Action.Submit",
+      "title": "Create Confluence Page",
+      "data": {
+        "actionType": "createConfluencePage",
+        "serviceUrl": "${formData.serviceUrl}",
+        "conversationId": "${formData.conversationId}"
+      }
+    }
+  ]
+}

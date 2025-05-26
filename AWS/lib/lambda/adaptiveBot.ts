@@ -15,8 +15,13 @@ const BOT_PASSWORD = process.env.BOT_PASSWORD || 'default_bot_password';
 const BOT_NAME = process.env.BOT_NAME || 'default_bot_name';
 const AWS_HOSTED_ZONE_NAME = process.env.AWS_HOSTED_ZONE_NAME || 'default_hosted_zone_name';
 const AWS_API_ENDPOINT_NAME = process.env.AWS_API_ENDPOINT_NAME || 'default_cert_domain';
-
-
+const JIRA_BASE_URL= process.env.JIRA_BASE_URL || 'https://unknown.atlassian.net';
+const JIRA_EMAIL= process.env.JIRA_EMAIL || 'unknown';
+const JIRA_API_TOKEN= process.env.JIRA_API_TOKEN || 'unknown';
+const JIRA_PROJECT_KEY= process.env.JIRA_PROJECT_KEY || 'unknown';
+const CONFLUENCE_BASE_URL = process.env.CONFLUENCE_BASE_URL || 'https://unknown.atlassian.net/wiki'; 
+const CONFLUENCE_EMAIL = process.env.CONFLUENCE_EMAIL || 'unknown';
+const CONFLUENCE_API_TOKEN = process.env.CONFLUENCE_API_TOKEN|| 'unknown';
 
 
 export interface AdaptiveBotProps {
@@ -66,6 +71,13 @@ export class AdaptiveBot extends Construct {
         BOT_NAME: BOT_NAME,
         AWS_API_ENDPOINT_NAME: AWS_API_ENDPOINT_NAME,
         AWS_HOSTED_ZONE_NAME: AWS_HOSTED_ZONE_NAME,
+        JIRA_BASE_URL: JIRA_BASE_URL,
+        JIRA_EMAIL: JIRA_EMAIL,
+        JIRA_API_TOKEN: JIRA_API_TOKEN,
+        JIRA_PROJECT_KEY: JIRA_PROJECT_KEY,
+        CONFLUENCE_BASE_URL: CONFLUENCE_BASE_URL,
+        CONFLUENCE_EMAIL: CONFLUENCE_EMAIL,
+        CONFLUENCE_API_TOKEN: CONFLUENCE_API_TOKEN,
         dynamoDb: props.table.tableName,
       },
       tracing: Tracing.ACTIVE, // Enable X-Ray tracing
