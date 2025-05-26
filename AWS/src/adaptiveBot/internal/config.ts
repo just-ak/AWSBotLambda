@@ -14,7 +14,8 @@ export const config = {
   CONFLUENCE_EMAIL: process.env.JIRA_EMAIL || 'unknown',
   CONFLUENCE_API_TOKEN: process.env.JIRA_API_TOKEN || 'unknown',
   PAGERDUTY_API_KEY: process.env.PAGERDUTY_API_KEY || 'unknown',
-  PAGERDUTY_BASE_URL: process.env.PAGERDUTY_BASE_URL || 'https://api.pagerduty.com',
+  PAGERDUTY_SUBDOMAIN: process.env.PAGERDUTY_SUBDOMAIN || 'unknown',
+  PAGERDUTY_SERVICE_ID: process.env.PAGERDUTY_SERVICE_ID || 'unknown',
 };
 
 
