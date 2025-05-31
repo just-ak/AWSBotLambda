@@ -7,7 +7,20 @@ import * as apigateway from 'aws-cdk-lib/aws-apigateway';
 import * as acm from 'aws-cdk-lib/aws-certificatemanager';
 import * as ssm from 'aws-cdk-lib/aws-ssm';
 import { Construct } from 'constructs';
-
+import { CloudFrontCognitoAuth } from '../cognito/cognitoCloudFront';
+import * as dotenv from 'dotenv';
+dotenv.config();
+// const AWS_HOSTED_ZONE_ID = process.env.AWS_HOSTED_ZONE_ID || 'default_hosted_zone_id';
+const AWS_HOSTED_ZONE_NAME = process.env.AWS_HOSTED_ZONE_NAME || 'default_hosted_zone_name';
+const AWS_API_ENDPOINT_NAME = process.env.AWS_API_ENDPOINT_NAME || 'default_cert_domain';
+// const AWS_CLOUDFRONT_SUBDOMAIN = process.env.AWS_CLOUDFRONT_SUBDOMAIN || 'www';
+const COGNITO_AZURE_TENANT_ID= process.env.COGNITO_AZURE_TENANT_ID || 'default_azure_tenant_id';
+// const COGNITO_AZURE_GROUP_NAME: process.env.COGNITO_AZURE_GROUP_NAME || 'default_azure_group_name';
+const COGNITO_AZURE_CLIENT_ID= process.env.COGNITO_AZURE_CLIENT_ID || 'default_azure_client_id';
+const COGNITO_AZURE_CLIENT_SECRET= process.env.COGNITO_AZURE_CLIENT_SECRET || 'default_azure_client_secret';
+const COGNITO_AZURE_CALLBACK_URL= process.env.COGNITO_AZURE_CALLBACK_URL || `https://${AWS_API_ENDPOINT_NAME}/prod/cognito/callback`;
+const COGNITO_AZURE_LOGOUT_URL= process.env.COGNITO_AZURE_LOGOUT_URL || `https://${AWS_API_ENDPOINT_NAME}/prod/cognito/logout`;
+const COGNITO_AZURE_GROUP_ID= process.env.COGNITO_AZURE_GROUP_ID || 'default_azure_group_id';
 export interface RootCloudProps {
   apiGateway: apigateway.RestApi;
   contentBucket: s3.Bucket;
@@ -17,7 +30,7 @@ export interface RootCloudProps {
 
 export class RootCloud extends Construct {
   public readonly distribution: cloudfront.Distribution;
-
+  public readonly cloudFrontCognitoAuth: CloudFrontCognitoAuth;
   constructor(scope: Construct, id: string, props: RootCloudProps) {
     super(scope, id);
 
@@ -42,15 +55,6 @@ export class RootCloud extends Construct {
       originAccessIdentity: oai,
       originPath: '/',
     });
-
-
-
-    const cognito = new CognitoConstruct(this, 'Cognito', {
-      userPoolName: 'MyUserPool',
-      identityPoolName: 'MyIdentityPool',
-    });
-
-
     // Create cache policies
     const apiCachePolicy = new cloudfront.CachePolicy(this, 'ApiCachePolicy', {
       defaultTtl: cdk.Duration.seconds(0),
@@ -105,6 +109,15 @@ export class RootCloud extends Construct {
       )
     );
 
+    this.cloudFrontCognitoAuth = new CloudFrontCognitoAuth(this, 'CloudFrontCognitoAuth', {
+      origin: assetsOrigin,
+      userPoolName: `${AWS_API_ENDPOINT_NAME}-${AWS_HOSTED_ZONE_NAME}`.replace(/\./g, '-').toLocaleLowerCase(), // Replace dots with underscores for valid user pool name
+      azureTenantId: COGNITO_AZURE_TENANT_ID, // Use the environment variable
+      azureClientId: COGNITO_AZURE_CLIENT_ID, // Use the environment variable
+      azureGroupName: COGNITO_AZURE_GROUP_ID,
+      azureClientSecret: COGNITO_AZURE_CLIENT_SECRET, // Use the environment variable
+    });
+
     // Create the CloudFront distribution
     this.distribution = new cloudfront.Distribution(this, 'Distribution', {
       defaultRootObject: 'index.html', // Add this line to serve index.html at the root path
@@ -113,7 +126,13 @@ export class RootCloud extends Construct {
         viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
         allowedMethods: cloudfront.AllowedMethods.ALLOW_GET_HEAD_OPTIONS,
         cachePolicy: cloudfront.CachePolicy.CACHING_OPTIMIZED,
-        responseHeadersPolicy,
+        responseHeadersPolicy: responseHeadersPolicy,
+        edgeLambdas: [
+          {
+            functionVersion: this.cloudFrontCognitoAuth.edgeFunctionVersion,
+            eventType: cloudfront.LambdaEdgeEventType.VIEWER_REQUEST
+          }
+        ]
       },
       additionalBehaviors: {
         '/prod': {
@@ -123,7 +142,7 @@ export class RootCloud extends Construct {
           cachePolicy: apiCachePolicy,
           responseHeadersPolicy,
           //originRequestPolicy: apiGatewayRequestPolicy,
-                   originRequestPolicy: cloudfront.OriginRequestPolicy.ALL_VIEWER,
+          originRequestPolicy: cloudfront.OriginRequestPolicy.ALL_VIEWER,
         },
       },
       priceClass: cloudfront.PriceClass.PRICE_CLASS_100,

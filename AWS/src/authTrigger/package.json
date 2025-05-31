@@ -3,7 +3,6 @@
   "dependencies": {
     "@types/aws-lambda": "^8.10.147",
     "aws-lambda": "^1.0.7"
-
   },
   "description": "",
   "license": "ISC",

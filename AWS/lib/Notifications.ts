@@ -11,7 +11,6 @@ import { EventRecorder } from "./dynamoDb/events";
 import { AssetsBucket } from "./s3/assets";
 import { RootCloud } from "./cloudfront/rootCloud";
 import * as dotenv from 'dotenv';
-import { SslCertificates } from "./certificates/sslCertificates";
 dotenv.config();
 // const AWS_HOSTED_ZONE_ID = process.env.AWS_HOSTED_ZONE_ID || 'default_hosted_zone_id';
 const AWS_HOSTED_ZONE_NAME = process.env.AWS_HOSTED_ZONE_NAME || 'default_hosted_zone_name';

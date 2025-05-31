@@ -1,7 +1,9 @@
 import 'source-map-support/register';
 import { App } from 'aws-cdk-lib';
 import { Notifications } from '../lib/Notifications';
-import { CertificateStack } from '../lib/certificate-stack';
+import { CertificateStack } from '../lib/certificateStack';
+import { EdgeLambdaStack } from '../lib/edgeLambdaStack';
+import { TempSSMParameterStack } from '../lib/tempSSMParameter';
 
 export const app = new App();
 
@@ -13,6 +15,14 @@ const certStack = new CertificateStack(app, 'ops-certificates', {
    env: { region: 'us-east-1' }, // Must be us-east-1 for CloudFront
  });
  
+const edgeLambda = new EdgeLambdaStack(app, 'ops-edge-lambdas', {
+   env: { region: 'us-east-1' }, // Must be us-east-1 for CloudFront
+ });
+
+
+ const tempSSMParameterStack = new TempSSMParameterStack(app, 'ops-temp-ssm', {
+   env: { region: 'us-east-1' }, // Must be us-east-1 for CloudFront
+ });
  // Add dependencies if necessary
 // mainStack.addDependency(certStack);
 
