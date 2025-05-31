@@ -43,6 +43,14 @@ export class RootCloud extends Construct {
       originPath: '/',
     });
 
+
+
+    const cognito = new CognitoConstruct(this, 'Cognito', {
+      userPoolName: 'MyUserPool',
+      identityPoolName: 'MyIdentityPool',
+    });
+
+
     // Create cache policies
     const apiCachePolicy = new cloudfront.CachePolicy(this, 'ApiCachePolicy', {
       defaultTtl: cdk.Duration.seconds(0),
