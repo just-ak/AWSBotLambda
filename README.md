@@ -12,6 +12,8 @@ This project implements a serverless architecture on AWS that:
 
 ## Architecture
 
+https://aws.amazon.com/blogs/security/how-to-set-up-amazon-cognito-for-federated-authentication-using-azure-ad/
+
 The diagram below represents the infrastructure components and their relationships deployed by the CDK stack.
 
 ```mermaid
