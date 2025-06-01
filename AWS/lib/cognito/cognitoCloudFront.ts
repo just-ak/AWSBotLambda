@@ -81,19 +81,36 @@ export class CloudFrontCognitoAuth extends Construct {
         //     '/edgelambda/authFunction/arn'
         // );
 
-        this.lambdaVersionArn = ssm.StringParameter.fromStringParameterAttributes(
-            this, 'edgelambdaAuthFunctionArn',
-            { parameterName: '/edgelambda/authFunction/arn' }
-        ).stringValue;
+        // First check if the SSM parameter exists
+        try {
+            // Try to get the lambda version ARN from SSM parameter
+            this.lambdaVersionArn = ssm.StringParameter.valueForStringParameter(
+                this,
+                '/edgelambda/authFunction/arn'
+            );
 
+            // Import the edge function version from the ARN
+            this.edgeFunctionVersion = lambda.Version.fromVersionArn(
+                this,
+                'ImportedEdgeLambdaVersion',
+                this.lambdaVersionArn
+            );
+        } catch (error) {
+            // If the parameter doesn't exist, create a placeholder - this will be updated after deployment
+            console.warn('Could not find edge function ARN in SSM, the stack might need to be deployed in multiple stages');
+            
+            // Create a dummy version ARN for first deployment
+            this.lambdaVersionArn = `arn:aws:lambda:us-east-1:123456789012:function:placeholder-function:1`;
+            
+            // Create a dummy version - this will cause an error if referenced before the actual resource is created
+            this.edgeFunctionVersion = lambda.Version.fromVersionArn(
+                this,
+                'PlaceholderEdgeLambdaVersion',
+                this.lambdaVersionArn
+            );
+        }
 
-        this.edgeFunctionVersion = lambda.Version.fromVersionArn(
-            this,
-            'ImportedEdgeLambdaVersion',
-            this.lambdaVersionArn
-        );
-
-
+        // Create an SSM parameter for the Cognito user pool ARN for the edge function to use
         this.cognitoAuthUserPoolUserPoolArn = new CrossRegionSsmParameter(this, 'CrossRegionSsmParameter', {
             parameterName: '/cognitoAuth/userPool/userPoolArn',
             parameterValue: this.cognitoAuth.userPool.userPoolArn,

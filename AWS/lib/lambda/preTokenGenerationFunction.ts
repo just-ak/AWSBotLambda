@@ -15,7 +15,7 @@ export class PreTokenGenerationFunction extends Construct {
     this.lambdaFunction = new lambda.Function(this, 'PreTokenGenerationFunction', {
       runtime: lambda.Runtime.NODEJS_18_X,
       handler: 'index.handler',
-      code: lambda.Code.fromAsset('src/authTrigger'),
+      code: lambda.Code.fromAsset('src/preTokenGenerationFunction'),
       timeout: cdk.Duration.seconds(30),
       environment: {
         AUTHORIZED_AZURE_GROUP: props.azureGroupName

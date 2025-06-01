@@ -118,55 +118,66 @@ export class RootCloud extends Construct {
       azureClientSecret: COGNITO_AZURE_CLIENT_SECRET, // Use the environment variable
     });
 
+    // Create function associations for the CloudFront distribution behaviors
+    const edgeLambdas = [
+      {
+        functionVersion: this.cloudFrontCognitoAuth.edgeFunctionVersion,
+        eventType: cloudfront.LambdaEdgeEventType.VIEWER_REQUEST
+      }
+    ];
+
     // Create the CloudFront distribution
     this.distribution = new cloudfront.Distribution(this, 'Distribution', {
-      defaultRootObject: 'index.html', // Add this line to serve index.html at the root path
+      defaultRootObject: 'index.html',
       defaultBehavior: {
         origin: contentBucketOrigin,
         viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
         allowedMethods: cloudfront.AllowedMethods.ALLOW_GET_HEAD_OPTIONS,
         cachePolicy: cloudfront.CachePolicy.CACHING_OPTIMIZED,
         responseHeadersPolicy: responseHeadersPolicy,
-        edgeLambdas: [
-          {
-            functionVersion: this.cloudFrontCognitoAuth.edgeFunctionVersion,
-            eventType: cloudfront.LambdaEdgeEventType.VIEWER_REQUEST
-          }
-        ]
+        edgeLambdas: edgeLambdas,
       },
       additionalBehaviors: {
-        '/prod': {
+        '/prod/*': { // Changed from '/prod' to '/prod/*' to match all API paths
           origin: apiGatewayOrigin,
           viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.HTTPS_ONLY,
           allowedMethods: cloudfront.AllowedMethods.ALLOW_ALL,
           cachePolicy: apiCachePolicy,
           responseHeadersPolicy,
-          //originRequestPolicy: apiGatewayRequestPolicy,
           originRequestPolicy: cloudfront.OriginRequestPolicy.ALL_VIEWER,
+        },
+        '/assets/*': {
+          origin: assetsOrigin,
+          viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+          allowedMethods: cloudfront.AllowedMethods.ALLOW_GET_HEAD_OPTIONS,
+          cachePolicy: cloudfront.CachePolicy.CACHING_OPTIMIZED,
+          responseHeadersPolicy,
+          //originRequestPolicy: assetsRequestPolicy,
         },
       },
       priceClass: cloudfront.PriceClass.PRICE_CLASS_100,
       enableIpv6: true,
       httpVersion: cloudfront.HttpVersion.HTTP2_AND_3,
-      domainNames: props.domainNames, // Add the alternate domain names
-      certificate: certificate, // Add the ACM certificate for HTTPS
+      domainNames: props.domainNames,
+      certificate: certificate,
+      errorResponses: [
+        {
+          httpStatus: 403,
+          responseHttpStatus: 200,
+          responsePagePath: '/index.html',
+        },
+        {
+          httpStatus: 404,
+          responseHttpStatus: 200,
+          responsePagePath: '/index.html',
+        },
+      ],
     });
 
-    // Create a custom origin request policy for assets
-    const assetsRequestPolicy = new cloudfront.OriginRequestPolicy(this, 'AssetsRequestPolicy', {
-      originRequestPolicyName: 'AssetsRequestPolicy',
-      headerBehavior: cloudfront.OriginRequestHeaderBehavior.none(),
-      queryStringBehavior: cloudfront.OriginRequestQueryStringBehavior.all(),
-      cookieBehavior: cloudfront.OriginRequestCookieBehavior.none(),
-    });
-
-    const pathPattern = `/assets/*`;
-    this.distribution.addBehavior(pathPattern, assetsOrigin, {
-      viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
-      allowedMethods: cloudfront.AllowedMethods.ALLOW_GET_HEAD_OPTIONS,
-      cachePolicy: cloudfront.CachePolicy.CACHING_OPTIMIZED,
-      responseHeadersPolicy,
-      originRequestPolicy: assetsRequestPolicy,
+    // Output the distribution URL
+    new cdk.CfnOutput(this, 'CloudFrontURL', {
+      value: `https://${this.distribution.distributionDomainName}`,
+      description: 'URL of the CloudFront distribution',
     });
   }
 }

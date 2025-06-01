@@ -14,56 +14,68 @@ export class EdgeLambdaStack extends cdk.Stack {
   public readonly crossRegionSsmParameter: CrossRegionSsmParameter;
   public readonly authFunction: AuthFunction;
   public readonly cognitoAuthUserPoolUserPoolArn: ssm.IStringParameter;
-  public readonly cognitoUserPoolRegion: ssm.IStringParameter;
-  public readonly cognitoUserPoolId: ssm.IStringParameter;
-  public readonly cognitoGroup: ssm.IStringParameter;
+  public readonly cognitoUserPoolRegion: string = 'eu-west-2';
+  public readonly cognitoUserPoolId: string;
 
   constructor(scope: Construct, id: string, props: EdgeLambdaStackProps) {
     // Ensure the certificate is created in us-east-1
     super(scope, id, {
       ...props,
-      env: { region: 'us-east-1' }, // Force us-east-1 region for CloudFront certificates
+      env: { region: 'us-east-1' }, // Force us-east-1 region for CloudFront edge functions
     });
 
-    this.cognitoAuthUserPoolUserPoolArn = ssm.StringParameter.fromStringParameterAttributes(
-      this, 'cognitoAuthUserPoolUserPoolArn',
-      { parameterName: '/cognitoAuth/userPool/userPoolArn' }
-    );
+    // Try to get the Cognito User Pool ARN from SSM
+    try {
+      this.cognitoAuthUserPoolUserPoolArn = ssm.StringParameter.fromStringParameterAttributes(
+        this, 'cognitoAuthUserPoolUserPoolArn',
+        { parameterName: '/cognitoAuth/userPool/userPoolArn' }
+      );
+      
+      // Extract the user pool ID from the ARN
+      this.cognitoUserPoolId = cdk.Fn.select(1, cdk.Fn.split('/userPool/', this.cognitoAuthUserPoolUserPoolArn.stringValue));
+    } catch (error) {
+      // Use a default value if the parameter doesn't exist yet
+      this.cognitoUserPoolId = 'placeholder-user-pool-id';
+      console.warn('Could not find Cognito User Pool ARN in SSM, using placeholder value');
+    }
 
-    // this.cognitoUserPoolRegion = ssm.StringParameter.fromStringParameterAttributes(
-    //   this, 'cognitoUserPoolRegion',
-    //   { parameterName: '/cognitoUserPoolRegion' }
-    // );
-
-    // this.cognitoUserPoolId = ssm.StringParameter.fromStringParameterAttributes(
-    //   this, 'cognitoUserPoolId',
-    //   { parameterName: '/cognitoUserPoolId' }
-    // );
-
-    // this.cognitoGroup = ssm.StringParameter.fromStringParameterAttributes(
-    //   this, 'cognitoGroup',
-    //   { parameterName: '/cognitoGroup' }
-    // );
-
-
+    // Create the edge function with necessary permissions
     this.authFunction = new AuthFunction(this, 'AuthFunction', {
-      // cognitoUserPoolRegion: this.cognitoUserPoolRegion.stringValue,
-      // cognitoUserPoolId: this.cognitoUserPoolId.stringValue,
-      // cognitoGroup: this.cognitoGroup.stringValue
+      cognitoUserPoolRegion: this.cognitoUserPoolRegion,
+      cognitoUserPoolId: this.cognitoUserPoolId,
     });
 
+    // Add explicit permissions for the Lambda@Edge function to access Cognito
+    const cognitoPolicy = new iam.PolicyStatement({
+      effect: iam.Effect.ALLOW,
+      actions: [
+        'cognito-idp:DescribeUserPool',
+        'cognito-idp:DescribeUserPoolClient',
+        'cognito-idp:ListUserPoolClients',
+        'cognito-idp:GetUser',
+        'cognito-idp:GetUserPoolMfaConfig'
+      ],
+      resources: ['*'] // It's better to scope this down when possible
+    });
 
-    // Allow the function to describe the user pool
-    this.authFunction.edgeFunction.addToRolePolicy(new iam.PolicyStatement({
-      actions: ['cognito-idp:DescribeUserPool', 'cognito-idp:DescribeUserPoolClient'],
-      resources: [this.cognitoAuthUserPoolUserPoolArn.stringValue
-      ]
-    }));
+    this.authFunction.edgeFunction.addToRolePolicy(cognitoPolicy);
 
+    // Store the Lambda function ARN in a cross-region SSM parameter
     this.crossRegionSsmParameter = new CrossRegionSsmParameter(this, 'CrossRegionSsmParameter', {
       parameterName: '/edgelambda/authFunction/arn',
-      parameterValue: this.authFunction.edgeFunction.functionArn,
+      parameterValue: this.authFunction.edgeFunction.currentVersion.functionArn,
       region: 'eu-west-2'
+    });
+
+    // Output the Lambda function ARN for reference
+    new cdk.CfnOutput(this, 'EdgeFunctionArn', {
+      value: this.authFunction.edgeFunction.functionArn,
+      description: 'ARN of the edge function'
+    });
+
+    new cdk.CfnOutput(this, 'EdgeFunctionVersionArn', {
+      value: this.authFunction.edgeFunction.currentVersion.functionArn,
+      description: 'ARN of the edge function version'
     });
   }
 }

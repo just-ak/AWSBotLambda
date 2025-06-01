@@ -10,8 +10,8 @@ const jwkCacheMaxAge = 60 * 60 * 1000; // 1 hour
 
 
 const COGNITO_USER_POOL_REGION = 'eu-west-2';
-const COGNITO_USER_POOL_ID = 'eu-west-2_xkIXRJiaD';
-const COGNITO_GROUP = 'eu-west-2_xkIXRJiaD_AzureAD';
+const COGNITO_USER_POOL_ID = 'eu-west-2_hUnONOh8V';
+const COGNITO_GROUP = 'eu-west-2_hUnONOh8V_callback';
 /**
  * CloudFront Edge Lambda function to validate JWT tokens from Cognito
  */

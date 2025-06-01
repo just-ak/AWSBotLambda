@@ -9,6 +9,8 @@ dotenv.config();
 const AWS_HOSTED_ZONE_NAME = process.env.AWS_HOSTED_ZONE_NAME || 'default_hosted_zone_name';
 const AWS_API_ENDPOINT_NAME = process.env.AWS_API_ENDPOINT_NAME || 'default_cert_domain';
 const COGNITO_USER_POOL_DOMAIN = process.env.COGNITO_USER_POOL_DOMAIN || 'default_cognito_domain';
+const COGNITO_APP_FEDERATION_METADATA_URL = process.env.COGNITO_APP_FEDERATION_METADATA_URL || `https://${AWS_API_ENDPOINT_NAME}.${AWS_HOSTED_ZONE_NAME}/prod/cognito/federation/metadata`;
+const COGNITO_AZURE_CALLBACK_URL = process.env.COGNITO_AZURE_CALLBACK_URL || `https://${AWS_API_ENDPOINT_NAME}.${AWS_HOSTED_ZONE_NAME}/callback`;
 // const AWS_CLOUDFRONT_SUBDOMAIN = process.env.AWS_CLOUDFRONT_SUBDOMAIN || 'www';
 
 
@@ -65,7 +67,7 @@ export class CognitoAzureAuth extends Construct {
   /**
    * The Cognito Identity Provider
    */
-  public readonly identityProvider: cognito.UserPoolIdentityProviderOidc;
+  public readonly identityProvider: cognito.UserPoolIdentityProviderSaml;
 
   constructor(scope: Construct, id: string, props: CognitoAzureAuthProps) {
     super(scope, id);
@@ -84,10 +86,10 @@ export class CognitoAzureAuth extends Construct {
         }
       },
       customAttributes: {
-        groups: new cognito.StringAttribute({ mutable: true }),  // for groups claim mapping
+        groups: new cognito.StringAttribute({ mutable: true })
       },
       accountRecovery: cognito.AccountRecovery.EMAIL_ONLY,
-      removalPolicy: cdk.RemovalPolicy.RETAIN
+      removalPolicy: cdk.RemovalPolicy.DESTROY
     });
 
     // Add pre-token generation Lambda trigger if provided
@@ -98,58 +100,77 @@ export class CognitoAzureAuth extends Construct {
       );
     }
 
-    // Configure the Azure AD Identity Provider
-
-    this.identityProvider = new cognito.UserPoolIdentityProviderOidc(this, 'AzureADProvider', {
+    // Configure the Azure AD Identity Provider as SAML instead of OIDC
+    this.identityProvider = new cognito.UserPoolIdentityProviderSaml(this, 'AzureADProvider', {
       userPool: this.userPool,
-      name: 'AzureAD',
-      clientId: props.azureClientId,
-      clientSecret: props.azureClientSecret,
-      issuerUrl: `https://login.microsoftonline.com/${props.azureTenantId}/v2.0`,
-      // https://login.microsoftonline.com/${props.azureTenantId}/v2.0/.well-known/openid-configuration
-
-      attributeMapping: {
-        email: cognito.ProviderAttribute.other('email'),
-        givenName: cognito.ProviderAttribute.other('given_name'),
-        familyName: cognito.ProviderAttribute.other('family_name'),
-        // custom: {
-        //   'groups': cognito.ProviderAttribute.other('groups')
-        // }
+      name: COGNITO_AZURE_CALLBACK_URL,
+      metadata: {
+        metadataType: cognito.UserPoolIdentityProviderSamlMetadataType.URL,
+        metadataContent: COGNITO_APP_FEDERATION_METADATA_URL, // `https://login.microsoftonline.com/${props.azureTenantId}/federationmetadata/2007-06/federationmetadata.xml`,
       },
-      scopes: ['openid', 'profile', 'email'],
+      attributeMapping: {
+        email: cognito.ProviderAttribute.other('http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress'),
+        givenName: cognito.ProviderAttribute.other('http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname'),
+        familyName: cognito.ProviderAttribute.other('http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname'),
+        custom: {
+          'custom:groups': cognito.ProviderAttribute.other('http://schemas.xmlsoap.org/ws/2005/05/identity/claims/groups')
+        }
+      },
+      identifiers: [props.azureClientId],
     });
-
+    (this.identityProvider.node.defaultChild as cdk.CfnResource).applyRemovalPolicy(cdk.RemovalPolicy.DESTROY);
     // Create a user pool client
     this.userPoolClient = new cognito.UserPoolClient(this, 'UserPoolClient', {
+      /*
+      aws cognito-idp create-user-pool-client \
+ --user-pool-id <yourUserPoolID> \
+ --client-name <yourAppClientName> \
+ --no-generate-secret \
+ --callback-urls <callbackURL> \
+ --allowed-o-auth-flows code \
+ --allowed-o-auth-scopes openid email\
+ --supported-identity-providers <IDProviderName> \
+ --allowed-o-auth-flows-user-pool-client
+
+       */
+      userPoolClientName: 'AzureADClient',
+      generateSecret: false, // Set to true if you need a client secret
+
       userPool: this.userPool,
       authFlows: {
-        userPassword: true,
-        userSrp: true,
-        custom: true
+        userPassword: false,
+        userSrp: false,
+        custom: false
       },
       oAuth: {
         flows: {
           authorizationCodeGrant: true,
-          implicitCodeGrant: true
+          implicitCodeGrant: false
         },
-        scopes: [cognito.OAuthScope.OPENID, cognito.OAuthScope.EMAIL, cognito.OAuthScope.PROFILE],
+        scopes: [
+          cognito.OAuthScope.OPENID,
+          cognito.OAuthScope.EMAIL,
+          // cognito.OAuthScope.PROFILE
+        ],
         callbackUrls: [`https://${AWS_API_ENDPOINT_NAME}.${AWS_HOSTED_ZONE_NAME}/callback`], // Replace with your actual callback URLs
         logoutUrls: [`https://${AWS_API_ENDPOINT_NAME}.${AWS_HOSTED_ZONE_NAME}/logout`]     // Replace with your actual logout URLs
       },
       supportedIdentityProviders: [
-        cognito.UserPoolClientIdentityProvider.COGNITO,
-        cognito.UserPoolClientIdentityProvider.custom((this.identityProvider as cognito.UserPoolIdentityProviderOidc).providerName)
+        // cognito.UserPoolClientIdentityProvider.COGNITO,
+        cognito.UserPoolClientIdentityProvider.custom((this.identityProvider as cognito.UserPoolIdentityProviderSaml).providerName)
       ]
     });
 
     // Wait for the identity provider to be created before creating the user pool domain
     this.userPoolClient.node.addDependency(this.identityProvider);
-
-
     this.userPool.addDomain('UserPoolDomain', {
       cognitoDomain: {
         domainPrefix: `${COGNITO_USER_POOL_DOMAIN}`
       }
+
     });
+    const cfnDomain = this.userPool.node.findChild('UserPoolDomain') as cognito.CfnUserPoolDomain;
+    cfnDomain.applyRemovalPolicy(cdk.RemovalPolicy.DESTROY);
+
   }
 }
