@@ -2,6 +2,7 @@ import * as cloudfront from 'aws-cdk-lib/aws-cloudfront';
 import { Construct } from 'constructs';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import { Duration, Stack } from 'aws-cdk-lib';
+import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 
 export interface AuthFunctionProps {
   cognitoUserPoolRegion: string;
@@ -19,7 +20,8 @@ export class AuthFunction extends Construct {
     this.edgeFunction = new cloudfront.experimental.EdgeFunction(this, 'AuthFunction', {
       runtime: lambda.Runtime.NODEJS_18_X, // Lambda@Edge supports Node.js 18.x
       handler: 'index.handler',
-      code: lambda.Code.fromAsset('./src/edgeAuth'),
+      
+      code: lambda.Code.fromAsset('./src/edgeAuth/'),
       timeout: Duration.seconds(5), // Maximum allowed for viewer request/response is 5 seconds
       memorySize: 128,
       description: 'CloudFront authentication edge function',

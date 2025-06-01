@@ -62,7 +62,8 @@ export class CloudFrontCognitoAuth extends Construct {
         super(scope, id);
 
         this.preTokenGenerationFunction = new PreTokenGenerationFunction(this, 'PreTokenGenerationFunction', {
-            azureGroupName: props.azureGroupName
+            azureGroupName: props.azureGroupName,
+            providerName: 'AzureAD' // Default provider name, can be customized
         });
 
         // Create the Cognito authentication construct
@@ -84,11 +85,15 @@ export class CloudFrontCognitoAuth extends Construct {
         // First check if the SSM parameter exists
         try {
             // Try to get the lambda version ARN from SSM parameter
-            this.lambdaVersionArn = ssm.StringParameter.valueForStringParameter(
-                this,
-                '/edgelambda/authFunction/arn'
-            );
+            // this.lambdaVersionArn = ssm.StringParameter.valueForStringParameter(
+            //     this,
+            //     '/edgelambda/authFunction/arn'
+            // );
 
+                   this.lambdaVersionArn = ssm.StringParameter.valueForStringParameter(
+            this,
+            '/edgelambda/authFunction/arn'
+        );
             // Import the edge function version from the ARN
             this.edgeFunctionVersion = lambda.Version.fromVersionArn(
                 this,

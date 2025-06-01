@@ -4,7 +4,10 @@ import * as ssm from 'aws-cdk-lib/aws-ssm';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import { CrossRegionSsmParameter } from './ssm/crossRegion';
 import { AuthFunction } from './cloudfrontEdgeFunction/authFunction';
-
+import * as dotenv from 'dotenv';
+dotenv.config();
+const COGNITO_AWS_REGION = process.env.COGNITO_AWS_REGION || 'eu-west-2';
+// const AWS_HOSTED_ZONE_ID = process.env.AWS_HOSTED_ZONE_ID || 'default_hosted_zone_id';
 
 export interface EdgeLambdaStackProps extends cdk.StackProps {
 
@@ -14,7 +17,7 @@ export class EdgeLambdaStack extends cdk.Stack {
   public readonly crossRegionSsmParameter: CrossRegionSsmParameter;
   public readonly authFunction: AuthFunction;
   public readonly cognitoAuthUserPoolUserPoolArn: ssm.IStringParameter;
-  public readonly cognitoUserPoolRegion: string = 'eu-west-2';
+  public readonly cognitoUserPoolRegion: string = COGNITO_AWS_REGION;
   public readonly cognitoUserPoolId: string;
 
   constructor(scope: Construct, id: string, props: EdgeLambdaStackProps) {
@@ -64,7 +67,7 @@ export class EdgeLambdaStack extends cdk.Stack {
     this.crossRegionSsmParameter = new CrossRegionSsmParameter(this, 'CrossRegionSsmParameter', {
       parameterName: '/edgelambda/authFunction/arn',
       parameterValue: this.authFunction.edgeFunction.currentVersion.functionArn,
-      region: 'eu-west-2'
+      region: COGNITO_AWS_REGION
     });
 
     // Output the Lambda function ARN for reference

@@ -12,7 +12,7 @@ const COGNITO_USER_POOL_DOMAIN = process.env.COGNITO_USER_POOL_DOMAIN || 'defaul
 const COGNITO_APP_FEDERATION_METADATA_URL = process.env.COGNITO_APP_FEDERATION_METADATA_URL || `https://${AWS_API_ENDPOINT_NAME}.${AWS_HOSTED_ZONE_NAME}/prod/cognito/federation/metadata`;
 const COGNITO_AZURE_CALLBACK_URL = process.env.COGNITO_AZURE_CALLBACK_URL || `https://${AWS_API_ENDPOINT_NAME}.${AWS_HOSTED_ZONE_NAME}/callback`;
 // const AWS_CLOUDFRONT_SUBDOMAIN = process.env.AWS_CLOUDFRONT_SUBDOMAIN || 'www';
-
+const COGNITO_USER_POOL_NAME = process.env.COGNITO_USER_POOL_NAME || 'default_user_pool_name';
 
 /**
  * Properties for the CognitoAzureAuth construct
@@ -103,7 +103,7 @@ export class CognitoAzureAuth extends Construct {
     // Configure the Azure AD Identity Provider as SAML instead of OIDC
     this.identityProvider = new cognito.UserPoolIdentityProviderSaml(this, 'AzureADProvider', {
       userPool: this.userPool,
-      name: COGNITO_AZURE_CALLBACK_URL,
+      name: COGNITO_USER_POOL_NAME,
       metadata: {
         metadataType: cognito.UserPoolIdentityProviderSamlMetadataType.URL,
         metadataContent: COGNITO_APP_FEDERATION_METADATA_URL, // `https://login.microsoftonline.com/${props.azureTenantId}/federationmetadata/2007-06/federationmetadata.xml`,
@@ -150,13 +150,13 @@ export class CognitoAzureAuth extends Construct {
         scopes: [
           cognito.OAuthScope.OPENID,
           cognito.OAuthScope.EMAIL,
-          // cognito.OAuthScope.PROFILE
+          cognito.OAuthScope.PROFILE
         ],
         callbackUrls: [`https://${AWS_API_ENDPOINT_NAME}.${AWS_HOSTED_ZONE_NAME}/callback`], // Replace with your actual callback URLs
         logoutUrls: [`https://${AWS_API_ENDPOINT_NAME}.${AWS_HOSTED_ZONE_NAME}/logout`]     // Replace with your actual logout URLs
       },
       supportedIdentityProviders: [
-        // cognito.UserPoolClientIdentityProvider.COGNITO,
+        cognito.UserPoolClientIdentityProvider.COGNITO,
         cognito.UserPoolClientIdentityProvider.custom((this.identityProvider as cognito.UserPoolIdentityProviderSaml).providerName)
       ]
     });

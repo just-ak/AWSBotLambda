@@ -34,7 +34,7 @@
     "**/*.ts",
     "setup.mjs",
     "teardown.mjs"
-, "src/adaptiveBot/internal/initialize.js"  ],
+, "src/adaptiveBot/internal/initialize.js", "src/edgeAuth/index.mjs"  ],
   "exclude": [
     "node_modules",
     "cdktf.out",

@@ -55,17 +55,18 @@ export class RootCloud extends Construct {
       originAccessIdentity: oai,
       originPath: '/',
     });
-    // Create cache policies
-    const apiCachePolicy = new cloudfront.CachePolicy(this, 'ApiCachePolicy', {
-      defaultTtl: cdk.Duration.seconds(0),
-      minTtl: cdk.Duration.seconds(0),
-      maxTtl: cdk.Duration.minutes(1),
-      headerBehavior: cloudfront.CacheHeaderBehavior.allowList(
-        'Authorization', 'Content-Type', 'Accept'
-      ),
-      queryStringBehavior: cloudfront.CacheQueryStringBehavior.all(),
-      cookieBehavior: cloudfront.CacheCookieBehavior.none(),
-    });
+    // // Create cache policies
+    // const apiCachePolicy = new cloudfront.CachePolicy(this, 'ApiCachePolicy', {
+    //   defaultTtl: cdk.Duration.seconds(0),
+    //   minTtl: cdk.Duration.seconds(0),
+    //   maxTtl: cdk.Duration.minutes(1),
+    //   headerBehavior: cloudfront.CacheHeaderBehavior.allowList(
+    //     'Authorization', 'Content-Type', 'Accept'
+    //   ),
+    //   queryStringBehavior: cloudfront.CacheQueryStringBehavior.all(),
+    //   cookieBehavior: cloudfront.CacheCookieBehavior.none(),
+      
+    // });
 
     // Common security headers
     const responseHeadersPolicy = new cloudfront.ResponseHeadersPolicy(this, 'SecurityHeadersPolicy', {
@@ -134,6 +135,7 @@ export class RootCloud extends Construct {
         viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
         allowedMethods: cloudfront.AllowedMethods.ALLOW_GET_HEAD_OPTIONS,
         cachePolicy: cloudfront.CachePolicy.CACHING_OPTIMIZED,
+       
         responseHeadersPolicy: responseHeadersPolicy,
         edgeLambdas: edgeLambdas,
       },
@@ -142,9 +144,10 @@ export class RootCloud extends Construct {
           origin: apiGatewayOrigin,
           viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.HTTPS_ONLY,
           allowedMethods: cloudfront.AllowedMethods.ALLOW_ALL,
-          cachePolicy: apiCachePolicy,
+          cachePolicy:  cloudfront.CachePolicy.CACHING_DISABLED, /// apiCachePolicy,
+           originRequestPolicy: cloudfront.OriginRequestPolicy.ALL_VIEWER_EXCEPT_HOST_HEADER, // Use all viewer headers for API requests
           responseHeadersPolicy,
-          originRequestPolicy: cloudfront.OriginRequestPolicy.ALL_VIEWER,
+         
         },
         '/assets/*': {
           origin: assetsOrigin,
@@ -164,12 +167,12 @@ export class RootCloud extends Construct {
         {
           httpStatus: 403,
           responseHttpStatus: 200,
-          responsePagePath: '/index.html',
+          responsePagePath: '/403.html',
         },
         {
           httpStatus: 404,
           responseHttpStatus: 200,
-          responsePagePath: '/index.html',
+          responsePagePath: '/404.html',
         },
       ],
     });
