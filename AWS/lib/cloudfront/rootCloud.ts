@@ -7,7 +7,7 @@ import * as apigateway from 'aws-cdk-lib/aws-apigateway';
 import * as acm from 'aws-cdk-lib/aws-certificatemanager';
 import * as ssm from 'aws-cdk-lib/aws-ssm';
 import { Construct } from 'constructs';
-import { CloudFrontCognitoAuth } from '../cognito/cognitoCloudFront';
+import { CloudFrontCognitoAuth } from '../cognito/cloudFrontCognitoAuth';
 import * as dotenv from 'dotenv';
 dotenv.config();
 // const AWS_HOSTED_ZONE_ID = process.env.AWS_HOSTED_ZONE_ID || 'default_hosted_zone_id';
@@ -21,6 +21,7 @@ const COGNITO_AZURE_CLIENT_SECRET= process.env.COGNITO_AZURE_CLIENT_SECRET || 'd
 const COGNITO_AZURE_CALLBACK_URL= process.env.COGNITO_AZURE_CALLBACK_URL || `https://${AWS_API_ENDPOINT_NAME}/prod/cognito/callback`;
 const COGNITO_AZURE_LOGOUT_URL= process.env.COGNITO_AZURE_LOGOUT_URL || `https://${AWS_API_ENDPOINT_NAME}/prod/cognito/logout`;
 const COGNITO_AZURE_GROUP_ID= process.env.COGNITO_AZURE_GROUP_ID || 'default_azure_group_id';
+const COGNITO_PROVIDER_NAME = process.env.COGNITO_PROVIDER_NAME || 'default_user_pool_name';
 export interface RootCloudProps {
   apiGateway: apigateway.RestApi;
   contentBucket: s3.Bucket;
@@ -117,6 +118,7 @@ export class RootCloud extends Construct {
       azureClientId: COGNITO_AZURE_CLIENT_ID, // Use the environment variable
       azureGroupName: COGNITO_AZURE_GROUP_ID,
       azureClientSecret: COGNITO_AZURE_CLIENT_SECRET, // Use the environment variable
+      providerName: COGNITO_PROVIDER_NAME, // Use the environment variable
     });
 
     // Create function associations for the CloudFront distribution behaviors
@@ -178,9 +180,9 @@ export class RootCloud extends Construct {
     });
 
     // Output the distribution URL
-    new cdk.CfnOutput(this, 'CloudFrontURL', {
-      value: `https://${this.distribution.distributionDomainName}`,
-      description: 'URL of the CloudFront distribution',
-    });
+    // new cdk.CfnOutput(this, 'CloudFrontURL', {
+    //   value: `https://${this.distribution.distributionDomainName}`,
+    //   description: 'URL of the CloudFront distribution',
+    // });
   }
 }

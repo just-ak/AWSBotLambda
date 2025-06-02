@@ -13,5 +13,4 @@ cdk.out
 
 # local files
 .DS_Store
-.vscode
 .env

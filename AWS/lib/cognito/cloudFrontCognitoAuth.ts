@@ -36,6 +36,7 @@ export interface CloudFrontCognitoAuthProps {
      */
     azureGroupName: string;
     azureClientSecret: string;
+    providerName: string; // Optional provider name for the pre-token generation function
 }
 
 /**
@@ -63,7 +64,7 @@ export class CloudFrontCognitoAuth extends Construct {
 
         this.preTokenGenerationFunction = new PreTokenGenerationFunction(this, 'PreTokenGenerationFunction', {
             azureGroupName: props.azureGroupName,
-            providerName: 'AzureAD' // Default provider name, can be customized
+            providerName: props.providerName, //'AzureAD' // Default provider name, can be customized
         });
 
         // Create the Cognito authentication construct
@@ -75,25 +76,12 @@ export class CloudFrontCognitoAuth extends Construct {
             azureGroupName: props.azureGroupName,
             preTokenGenerationFunction: this.preTokenGenerationFunction.lambdaFunction,
         });
-        //  the ssm parameter to stors the auth function ARN '/edgelambda/authFunction/FunctionArn' reteive the auth function ARN from the authFunction construct
-
-        // this.lambdaVersionArn = ssm.StringParameter.valueForStringParameter(
-        //     this,
-        //     '/edgelambda/authFunction/arn'
-        // );
-
         // First check if the SSM parameter exists
         try {
-            // Try to get the lambda version ARN from SSM parameter
-            // this.lambdaVersionArn = ssm.StringParameter.valueForStringParameter(
-            //     this,
-            //     '/edgelambda/authFunction/arn'
-            // );
-
-                   this.lambdaVersionArn = ssm.StringParameter.valueForStringParameter(
-            this,
-            '/edgelambda/authFunction/arn'
-        );
+            this.lambdaVersionArn = ssm.StringParameter.valueForStringParameter(
+                this,
+                '/edgelambda/authFunction/arn'
+            );
             // Import the edge function version from the ARN
             this.edgeFunctionVersion = lambda.Version.fromVersionArn(
                 this,
@@ -103,10 +91,10 @@ export class CloudFrontCognitoAuth extends Construct {
         } catch (error) {
             // If the parameter doesn't exist, create a placeholder - this will be updated after deployment
             console.warn('Could not find edge function ARN in SSM, the stack might need to be deployed in multiple stages');
-            
+
             // Create a dummy version ARN for first deployment
             this.lambdaVersionArn = `arn:aws:lambda:us-east-1:123456789012:function:placeholder-function:1`;
-            
+
             // Create a dummy version - this will cause an error if referenced before the actual resource is created
             this.edgeFunctionVersion = lambda.Version.fromVersionArn(
                 this,

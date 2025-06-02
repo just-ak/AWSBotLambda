@@ -10,10 +10,10 @@ const AWS_HOSTED_ZONE_NAME = process.env.AWS_HOSTED_ZONE_NAME || 'default_hosted
 const AWS_API_ENDPOINT_NAME = process.env.AWS_API_ENDPOINT_NAME || 'default_cert_domain';
 const COGNITO_USER_POOL_DOMAIN = process.env.COGNITO_USER_POOL_DOMAIN || 'default_cognito_domain';
 const COGNITO_APP_FEDERATION_METADATA_URL = process.env.COGNITO_APP_FEDERATION_METADATA_URL || `https://${AWS_API_ENDPOINT_NAME}.${AWS_HOSTED_ZONE_NAME}/prod/cognito/federation/metadata`;
-const COGNITO_AZURE_CALLBACK_URL = process.env.COGNITO_AZURE_CALLBACK_URL || `https://${AWS_API_ENDPOINT_NAME}.${AWS_HOSTED_ZONE_NAME}/callback`;
+const COGNITO_AZURE_CALLBACK_URL = process.env.COGNITO_AZURE_CALLBACK_URL || `https://${AWS_API_ENDPOINT_NAME}.${AWS_HOSTED_ZONE_NAME}/callback.html`;
 // const AWS_CLOUDFRONT_SUBDOMAIN = process.env.AWS_CLOUDFRONT_SUBDOMAIN || 'www';
+const COGNITO_PROVIDER_NAME = process.env.COGNITO_PROVIDER_NAME || 'default_user_pool_name';
 const COGNITO_USER_POOL_NAME = process.env.COGNITO_USER_POOL_NAME || 'default_user_pool_name';
-
 /**
  * Properties for the CognitoAzureAuth construct
  */
@@ -103,7 +103,7 @@ export class CognitoAzureAuth extends Construct {
     // Configure the Azure AD Identity Provider as SAML instead of OIDC
     this.identityProvider = new cognito.UserPoolIdentityProviderSaml(this, 'AzureADProvider', {
       userPool: this.userPool,
-      name: COGNITO_USER_POOL_NAME,
+      name: COGNITO_PROVIDER_NAME,
       metadata: {
         metadataType: cognito.UserPoolIdentityProviderSamlMetadataType.URL,
         metadataContent: COGNITO_APP_FEDERATION_METADATA_URL, // `https://login.microsoftonline.com/${props.azureTenantId}/federationmetadata/2007-06/federationmetadata.xml`,
@@ -133,7 +133,7 @@ export class CognitoAzureAuth extends Construct {
  --allowed-o-auth-flows-user-pool-client
 
        */
-      userPoolClientName: 'AzureADClient',
+      userPoolClientName: COGNITO_USER_POOL_NAME, // 'AzureADClient',
       generateSecret: false, // Set to true if you need a client secret
 
       userPool: this.userPool,
@@ -152,8 +152,8 @@ export class CognitoAzureAuth extends Construct {
           cognito.OAuthScope.EMAIL,
           cognito.OAuthScope.PROFILE
         ],
-        callbackUrls: [`https://${AWS_API_ENDPOINT_NAME}.${AWS_HOSTED_ZONE_NAME}/callback`], // Replace with your actual callback URLs
-        logoutUrls: [`https://${AWS_API_ENDPOINT_NAME}.${AWS_HOSTED_ZONE_NAME}/logout`]     // Replace with your actual logout URLs
+        callbackUrls: [`https://${AWS_API_ENDPOINT_NAME}.${AWS_HOSTED_ZONE_NAME}/callback.html`], // Replace with your actual callback URLs
+        logoutUrls: [`https://${AWS_API_ENDPOINT_NAME}.${AWS_HOSTED_ZONE_NAME}/logout.html`]     // Replace with your actual logout URLs
       },
       supportedIdentityProviders: [
         cognito.UserPoolClientIdentityProvider.COGNITO,
