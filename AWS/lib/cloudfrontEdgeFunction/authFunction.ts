@@ -1,7 +1,7 @@
 import * as cloudfront from 'aws-cdk-lib/aws-cloudfront';
 import { Construct } from 'constructs';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
-import { BundlingOutput, Duration } from 'aws-cdk-lib';
+import { Duration } from 'aws-cdk-lib';
 
 export interface AuthFunctionProps {
   cognitoUserPoolRegion: string;

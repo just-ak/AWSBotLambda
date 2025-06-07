@@ -2,63 +2,12 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Logging In...</title>
-  <script>
-    async function exchangeCodeForToken() {
-      const params = new URLSearchParams(window.location.search);
-      const code = params.get("code");
-
-      if (!code) {
-        document.body.innerText = "No code in URL. Login failed.";
-        return;
-      }
-
-      // Your Cognito details
-      const clientId = "4imklrd3dlruoi3sorqrt7qasa";
-      const redirectUri = "https://api2.aws.akfdev.com/callback.html";
-      const tokenEndpoint = "https://api2-akfdev.auth.eu-west-2.amazoncognito.com/oauth2/token";
-
-      const body = new URLSearchParams({
-        grant_type: "authorization_code",
-        client_id: clientId,
-        code: code,
-        redirect_uri: redirectUri,
-      });
-
-      try {
-        const res = await fetch(tokenEndpoint, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/x-www-form-urlencoded"
-          },
-          body
-        });
-
-        if (!res.ok) {
-          const err = await res.text();
-          document.body.innerText = "Token exchange failed:\n" + err;
-          return;
-        }
-
-        const data = await res.json();
-
-        // You can log data.id_token and/or data.access_token here for debugging
-        const idToken = data.id_token;
-
-        // Store the token in a cookie (expires in 1 hour)
-        document.cookie = `auth_id_token=${idToken}; path=/; max-age=3600; secure; SameSite=Lax`;
-
-        // Redirect to the protected root or page
-        window.location.href = "/";
-      } catch (err) {
-        document.body.innerText = "Token exchange error:\n" + err;
-      }
-    }
-
-    window.onload = exchangeCodeForToken;
-  </script>
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data: https://api2-akfdev.auth.eu-west-2.amazoncognito.com; connect-src 'self' https://api2-akfdev.auth.eu-west-2.amazoncognito.com; form-action 'self' https://api2-akfdev.auth.eu-west-2.amazoncognito.com;">
+  <title>Authenticating...</title>
+  <script src="/assets/js/authCognito.js"></script>
 </head>
 <body>
-  Logging you in...
+  <p>Signing you in...</p>
+  <div id="status"></div>
 </body>
 </html>

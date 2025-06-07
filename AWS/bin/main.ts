@@ -23,13 +23,13 @@ const tempSSMParameterStack = new TempSSMParameterStack(app, 'ops-temp-ssm', {
 });
 
 // Create the main application stack last, after dependencies are created
-const mainStack = new Notifications(app, `ops-Notifications`,{
+const opsNotifications = new Notifications(app, `ops-Notifications`,{
     env: { region: 'eu-west-2' },
 });
 
 // Add explicit dependencies to ensure proper deployment order
 // mainStack.addDependency(certStack);
-// mainStack.addDependency(edgeLambda);
+opsNotifications.addDependency(edgeLambda);
 
 
 app.synth();

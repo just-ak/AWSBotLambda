@@ -48,17 +48,6 @@ export class EndPointApiGateway extends Construct {
       validateRequestParameters: true,
     });
 
-
-    // const proxyLambda = new ProxyLambda(this, 'messageReducerLambda', {
-    //   bucket: props.bucket
-    // });
-
-    // const lambdaIntegration = new LambdaIntegration(proxyLambda.lambda, {
-    //   proxy: true,
-    //   contentHandling: ContentHandling.CONVERT_TO_BINARY,
-    // });
-    // this.api.root.addResource('{proxy+}').addMethod('GET', lambdaIntegration);
-
     const adaptiveBotAPI = new LambdaIntegration(props.postLambda);
 
     const apiKey = this.api.addApiKey('ApiKey', {

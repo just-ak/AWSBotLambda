@@ -19,56 +19,62 @@ const AWS_API_ENDPOINT_NAME = process.env.AWS_API_ENDPOINT_NAME || 'default_cert
 
 
 export class Notifications extends Stack {
+  public readonly notificationsTopic: NotificationsTopic;
+  public readonly adaptiveBot: AdaptiveBot;
+  public readonly messageReducer: MessageReducer;
+  public readonly endPointApiGateway: EndPointApiGateway;
+  public readonly rootCloud: RootCloud;
+  public readonly eventTable: EventRecorder;
+  public readonly docsBucket: DocumentationBucket;
+  public readonly assetsBucket: AssetsBucket;
+  public readonly route53EndPoint: Route53EndPoint;
+  public readonly eventBridgeRules: EventBridgeRules;
+
   constructor(scope: Construct, id: string, props?: StackProps) {
     super(scope, id);
 
-    const snsTopic = new NotificationsTopic(this, 'NotificationsTopic', {
+    this.notificationsTopic = new NotificationsTopic(this, 'NotificationsTopic', {
       displayName: 'awsNotificationsTopic'
     });
 
-    const docsBucket = new DocumentationBucket(this, 'DocumentationBucket', {
-      enableDirectAccess: false, // Access only through API Gateway
+    this.docsBucket = new DocumentationBucket(this, 'DocumentationBucket', {});
+
+    this.assetsBucket = new AssetsBucket(this, 'AssetsBucket', {});
+
+
+    this.eventTable = new EventRecorder(this, 'EventRecorder', {});
+
+    this.messageReducer = new MessageReducer(this, 'messageReducerLambda', {
+      topic: this.notificationsTopic.topic,
+      table: this.eventTable.table,
+    });
+    this.eventBridgeRules = new EventBridgeRules(this, 'EventBridgeRule', {
+      targetLambda: this.messageReducer.lambda,
     });
 
-    const assetsBucket = new AssetsBucket(this, 'AssetsBucket', {
-      enableDirectAccess: false, // Access only through API Gateway
-    });
-
-    const eventTable = new EventRecorder(this, 'EventRecorder', {
-    });
-
-    const messageReducer = new MessageReducer(this, 'messageReducerLambda', {
-      topic: snsTopic.topic,
-      table: eventTable.table,
-    });
-    new EventBridgeRules(this, 'EventBridgeRule', {
-      targetLambda: messageReducer.lambda,
-    });
-
-    const adaptiveBot = new AdaptiveBot(this, 'adaptiveBot', {
-      topic: snsTopic.topic,
-      table: eventTable.table,
+    this.adaptiveBot = new AdaptiveBot(this, 'adaptiveBot', {
+      topic: this.notificationsTopic.topic,
+      table: this.eventTable.table,
     });
     // Add the event table to the stack
-    eventTable.table.grantReadWriteData(messageReducer.lambda);
-    eventTable.table.grantReadWriteData(adaptiveBot.lambda);
+    this.eventTable.table.grantReadWriteData(this.messageReducer.lambda);
+    this.eventTable.table.grantReadWriteData(this.adaptiveBot.lambda);
 
 
-    const endPointApiGateway = new EndPointApiGateway(this, 'EndPointApiGateway', {
-      postLambda: adaptiveBot.lambda,
+    this.endPointApiGateway = new EndPointApiGateway(this, 'EndPointApiGateway', {
+      postLambda: this.adaptiveBot.lambda,
     });
 
-    const rootCloud = new RootCloud(this, 'RootCloud', {
-      apiGateway: endPointApiGateway.api,
-      contentBucket: docsBucket.bucket,
-      assetBucket: assetsBucket.bucket,
+    this.rootCloud = new RootCloud(this, 'RootCloud', {
+      apiGateway: this.endPointApiGateway.api,
+      contentBucket: this.docsBucket.bucket,
+      assetBucket: this.assetsBucket.bucket,
       domainNames: [`${AWS_API_ENDPOINT_NAME}.${AWS_HOSTED_ZONE_NAME}`]
-      // additionalBuckets: [assetsBucket.bucket],
     });
 
-    new Route53EndPoint(this, 'EndPoint', {
+    this.route53EndPoint = new Route53EndPoint(this, 'EndPoint', {
       // api: endPointApiGateway.api,
-      cloudFrontDistribution: rootCloud.distribution, // Pass the CloudFront distribution
+      cloudFrontDistribution: this.rootCloud.distribution, // Pass the CloudFront distribution
     });
 
   }

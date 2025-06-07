@@ -1,7 +1,7 @@
 import * as cloudfront from 'aws-cdk-lib/aws-cloudfront';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import { Construct } from 'constructs';
-import { CognitoAzureAuth } from './cognitoAzureAuth';
+import { CognitoAzureAuth } from './cognitoAzureOIDC';
 import { PreTokenGenerationFunction } from '../lambda/preTokenGenerationFunction';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as ssm from 'aws-cdk-lib/aws-ssm';
@@ -63,7 +63,7 @@ export class CloudFrontCognitoAuth extends Construct {
         super(scope, id);
 
         this.preTokenGenerationFunction = new PreTokenGenerationFunction(this, 'PreTokenGenerationFunction', {
-            azureGroupName: props.azureGroupName,
+            // azureGroupName: props.azureGroupName,
             providerName: props.providerName, //'AzureAD' // Default provider name, can be customized
         });
 
@@ -90,7 +90,7 @@ export class CloudFrontCognitoAuth extends Construct {
             );
         } catch (error) {
             // If the parameter doesn't exist, create a placeholder - this will be updated after deployment
-            console.warn('Could not find edge function ARN in SSM, the stack might need to be deployed in multiple stages');
+            console.warn('Could not find edge function ARN in SSM,expo the stack might need to be deployed in multiple stages');
 
             // Create a dummy version ARN for first deployment
             this.lambdaVersionArn = `arn:aws:lambda:us-east-1:123456789012:function:placeholder-function:1`;

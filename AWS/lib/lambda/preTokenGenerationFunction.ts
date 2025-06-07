@@ -3,7 +3,6 @@ import * as lambda from 'aws-cdk-lib/aws-lambda';
 import { Construct } from 'constructs';
 
 export interface PreTokenGenerationFunctionProps {
-  azureGroupName: string;
   providerName: string; // Name of the identity provider, e.g., 'AzureAD'
 }
 
@@ -19,7 +18,6 @@ export class PreTokenGenerationFunction extends Construct {
       code: lambda.Code.fromAsset('src/preTokenGenerationFunction'),
       timeout: cdk.Duration.seconds(30),
       environment: {
-        AUTHORIZED_AZURE_GROUP: props.azureGroupName,
         PROVIDER_NAME: props.providerName
       }
     });

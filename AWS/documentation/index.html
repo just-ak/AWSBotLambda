@@ -42,6 +42,32 @@
             gap: 1rem;
         }
         
+        /* Add these new styles for header navigation */
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logout-button {
+            background-color: var(--secondary-color);
+            color: var(--dark-bg);
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: background-color 0.3s ease;
+        }
+        
+        .logout-button:hover {
+            background-color: #e68a00;
+        }
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
         .logo h1 {
             margin: 0;
             font-weight: 300;
@@ -203,8 +229,13 @@
 <body>
     <header>
         <div class="container">
-            <div class="logo">
-                <h1>AWS <span>Bot</span> Documentation</h1>
+            <div class="header-content">
+                <div class="logo">
+                    <h1>AWS <span>Bot</span> Documentation</h1>
+                </div>
+                <div class="nav-actions">
+                    <a href="/logout.html" class="logout-button">Logout</a>
+                </div>
             </div>
         </div>
     </header>
