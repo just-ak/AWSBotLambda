@@ -37,10 +37,14 @@ done < "$ENV_FILE"
 COGNITO_DOMAIN="$COGNITO_USER_POOL_DOMAIN"
 CLIENT_ID="$COGNITO_CLIENT_ID"
 COGNITO_AWS_REGION="$COGNITO_AWS_REGION"
+AWS_API_ENDPOINT_NAME="$AWS_API_ENDPOINT_NAME"
+AWS_HOSTED_ZONE_NAME="$AWS_HOSTED_ZONE_NAME"
 
 echo "Using COGNITO_DOMAIN=$COGNITO_DOMAIN"
 echo "Using CLIENT_ID=$CLIENT_ID"
 echo "Using COGNITO_AWS_REGION=$COGNITO_AWS_REGION"
+echo "Using AWS_API_ENDPOINT_NAME=$AWS_API_ENDPOINT_NAME"
+echo "Using AWS_HOSTED_ZONE_NAME=$AWS_HOSTED_ZONE_NAME"
 # printenv | sort
 echo "=== End Environment Variables ==="
 
@@ -74,8 +78,10 @@ build() {
             echo "Processing ${rel_path}"
             # Process file with sed replacements
             sed "s|__COGNITO_USER_POOL_DOMAIN__|$COGNITO_USER_POOL_DOMAIN|g; 
-                 s|__COGNITO_CLIENT_ID__|$CLIENT_ID|g; \
-                 s|__COGNITO_AWS_REGION__|$COGNITO_AWS_REGION|g" \
+                s|__COGNITO_CLIENT_ID__|$CLIENT_ID|g; \
+                s|__COGNITO_AWS_REGION__|$COGNITO_AWS_REGION|g; \
+                s|__AWS_API_ENDPOINT_NAME__|$AWS_API_ENDPOINT_NAME|g; \
+                s|__AWS_HOSTED_ZONE_NAME__|$AWS_HOSTED_ZONE_NAME|g" \
                 "${src_file}" > "${dest_file}"
         else
             # Just copy other files without processing
