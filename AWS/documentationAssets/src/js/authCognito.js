@@ -26,8 +26,8 @@ async function processAuthentication() {
     }
     // logStatus(`Authorization code received: ${code.substring(0, 5)}...`);
 
-    const domain = 'https://api2-akfdev.auth.eu-west-2.amazoncognito.com';
-    const clientId = '7455fem1ti4qrb21uu24b51em2'; 
+    const domain = `https://__COGNITO_USER_POOL_DOMAIN__.auth.__COGNITO_AWS_REGION__.amazoncognito.com`;
+    const clientId = `__COGNITO_CLIENT_ID__`;
     const redirectUri = window.location.origin + "/callback.html";
 
     const tokenEndpoint = `${domain}/oauth2/token`;

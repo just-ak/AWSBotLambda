@@ -24,8 +24,8 @@ exports.handler = async (event) => {
 
 
   // === Configure these ===
-  const cognitoDomain = 'https://api2-akfdev.auth.eu-west-2.amazoncognito.com';
-  const clientId = '7455fem1ti4qrb21uu24b51em2';
+  const cognitoDomain = `https://__COGNITO_USER_POOL_DOMAIN__.auth.__COGNITO_AWS_REGION__.amazoncognito.com`;
+  const clientId = `__COGNITO_CLIENT_ID__`;
   const redirectPath = '/callback.html';
 
   console.log('EdgeAuth - Processing request for host:', headers.host?.[0]?.value);
@@ -48,7 +48,7 @@ exports.handler = async (event) => {
 
     request.headers['content-security-policy'].push({
       key: 'Content-Security-Policy',
-      value: "default-src 'self'; img-src 'self' data: https://api2-akfdev.auth.eu-west-2.amazoncognito.com; connect-src 'self' https://api2-akfdev.auth.eu-west-2.amazoncognito.com; form-action 'self' https://api2-akfdev.auth.eu-west-2.amazoncognito.com;"
+      value: `default-src 'self'; img-src 'self' data: ${cognitoDomain}; connect-src 'self' ${cognitoDomain}; form-action 'self' ${cognitoDomain};`
     });
 
     // Add CORS headers for the callback page

@@ -1,16 +1,27 @@
 {
   "compilerOptions": {
-      "target": "es6",
-      "module": "commonjs",
+      "target": "ES2022", // or even "ES2022"
+      "outDir": "./build",
+      "typeRoots": ["./node_modules/@types", "./types"],
+      "types": ["node"],
+      "allowJs": true,
+      "checkJs": false,
+      "moduleResolution": "node",
+      "esModuleInterop": true,
+      "resolveJsonModule": true,
       "strict": true,
-      "outDir": "./dist"
+      "module": "commonjs",
   },
   "include": [
-      "./**/*"
+      "./**/*",
+      "src/**/*.ts",
+      "src/**/*.d.ts",
+      "src/**/*.mjs"
   ],
   "exclude": [
       "node_modules",
       "**/*.spec.ts",
-      "**/*.d.ts"
+      "**/*.d.ts",
+      "src/__tests__/"
   ]
 }

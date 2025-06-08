@@ -1,8 +1,9 @@
 processLogout = () => {
-  const clientId = '7455fem1ti4qrb21uu24b51em2';
+  const domain = `https://__COGNITO_USER_POOL_DOMAIN__.auth.__COGNITO_AWS_REGION__.amazoncognito.com`;
+  const clientId = `__COGNITO_CLIENT_ID__`;
   const redirectUri = window.location.origin + '/'; // full URL with origin
-  const region = 'eu-west-2';
-  const userPoolDomain = 'api2-akfdev';
+  const region = '__COGNITO_AWS_REGION__';
+  const userPoolDomain = '__COGNITO_USER_POOL_DOMAIN__';
 
   // Clear local storage tokens
   localStorage.removeItem('accessToken');

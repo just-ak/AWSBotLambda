@@ -29,7 +29,7 @@ export class DocumentationBucket extends Construct {
     });
 
     new s3deploy.BucketDeployment(this, 'DeployDocumentation', {
-      sources: [s3deploy.Source.asset(path.join(__dirname, '../../documentation'))],
+      sources: [s3deploy.Source.asset(path.join(__dirname, '../../documentation/build'))],
       destinationBucket: this.bucket,
     });
 

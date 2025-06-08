@@ -25,8 +25,9 @@ export class AssetsBucket extends Construct {
     });
 
     new s3deploy.BucketDeployment(this, 'DeployAssets', {
-      sources: [s3deploy.Source.asset(path.join(__dirname, '../../documentationAssets'))],
+      sources: [s3deploy.Source.asset(path.join(__dirname, '../../documentationAssets/build'))],
       destinationBucket: this.bucket,
+      destinationKeyPrefix: 'assets', // Optional: specify a prefix for the assets
     });
   }
 }
