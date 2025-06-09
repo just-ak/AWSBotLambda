@@ -1,7 +1,7 @@
 import * as cloudfront from 'aws-cdk-lib/aws-cloudfront';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import { Construct } from 'constructs';
-import { CognitoAzureAuth } from './cognitoAzureOIDC';
+import { CognitoAuth } from './cognitoAuth';
 import { PreTokenGenerationFunction } from '../lambda/preTokenGenerationFunction';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as ssm from 'aws-cdk-lib/aws-ssm';
@@ -43,7 +43,7 @@ export interface CloudFrontCognitoAuthProps {
  * CloudFrontCognitoAuth construct creates a CloudFront distribution with a Cognito
  * authentication layer using Azure AD as the identity provider
  */
-export class CloudFrontCognitoAuth extends Construct {
+export class CloudFrontCognitoLink extends Construct {
     /**
      * The CloudFront distribution
      */
@@ -52,7 +52,7 @@ export class CloudFrontCognitoAuth extends Construct {
     /**
      * The Cognito authentication construct
      */
-    public readonly cognitoAuth: CognitoAzureAuth;
+    public readonly cognitoAuth: CognitoAuth;
     public readonly preTokenGenerationFunction: PreTokenGenerationFunction;
     public readonly authFunction: AuthFunction;
     public readonly cognitoAuthUserPoolUserPoolArn: CrossRegionSsmParameter;
@@ -68,7 +68,7 @@ export class CloudFrontCognitoAuth extends Construct {
         });
 
         // Create the Cognito authentication construct
-        this.cognitoAuth = new CognitoAzureAuth(this, 'CognitoAuth', {
+        this.cognitoAuth = new CognitoAuth(this, 'CognitoAuth', {
             userPoolName: props.userPoolName,
             azureTenantId: props.azureTenantId,
             azureClientId: props.azureClientId,

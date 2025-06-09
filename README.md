@@ -109,6 +109,44 @@ graph TD
 
 5. Configure your messaging platform webhook using the generated API Gateway URL
 
+## .env
+
+BOT_ID=---bot-id-----
+BOT_TYPE=MultiTenant
+BOT_TENANT_ID=22222222-1111-1111-1111-0000000000
+BOT_PASSWORD=---bot--password
+BOT_NAME=---bot---name-----
+AWS_HOSTED_ZONE_ID=----hosted-zone-id------
+AWS_HOSTED_ZONE_NAME=----domain-name------
+AWS_API_ENDPOINT_NAME=---api-endpoint------
+JIRA_BASE_URL=https://--jira-domain--.atlassian.net
+JIRA_EMAIL=--exanple@example.com
+JIRA_API_TOKEN=---TOKEN--
+JIRA_PROJECT_KEY=---project-key------
+CONFLUENCE_BASE_URL=https://--jira-domain--.atlassian.net
+CONFLUENCE_EMAIL=--exanple@example.com
+CONFLUENCE_API_TOKEN=TOKEN--   
+PAGERDUTY_API_KEY=----api-key--------
+PAGERDUTY_SUBDOMAIN=akfdev.eu
+PAGERDUTY_SERVICE_ID=---service-id-------
+COGNITO_AZURE_TENANT_ID=22222222-1111-1111-1111-0000000000
+COGNITO_AZURE_CLIENT_ID=---client-id-------
+COGNITO_AZURE_CLIENT_SECRET=---client-secret-------
+COGNITO_AZURE_GROUP_ID=----azure-group--------
+COGNITO_USER_POOL_CLIENT_NAME=AzureADClient
+COGNITO_USER_POOL_NAME=---poool-name
+COGNITO_PROVIDER_NAME=AzureAD
+COGNITO_AZURE_CALLBACK_URL=callback
+COGNITO_LOGOUT_URL=logout.html
+COGNITO_USER_POOL_DOMAIN=---pool-domain--
+COGNITO_CLIENT_ID=---client-id-----
+COGNITO_AWS_REGION=---aws-region----
+COGNITO_APP_FEDERATION_METADATA_URL=                            
+ENTRA_ID_LOGIN_URL=https://login.microsoftonline.com/Ò/saml2
+ENTRA_MICROSOFT_ENTRA_IDENTIFIER=https://sts.windows.net/22222222-1111-1111-1111-0000000000/
+ENTRA_ID_LOGOUT_URL=https://login.microsoftonline.com/22222222-1111-1111-1111-0000000000/saml2
+
+
 ## Configuration
 
 ### Event Mappings

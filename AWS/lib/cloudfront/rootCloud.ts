@@ -6,7 +6,7 @@ import * as apigateway from 'aws-cdk-lib/aws-apigateway';
 import * as acm from 'aws-cdk-lib/aws-certificatemanager';
 import * as ssm from 'aws-cdk-lib/aws-ssm';
 import { Construct } from 'constructs';
-import { CloudFrontCognitoAuth } from '../cognito/cloudFrontCognitoAuth';
+import { CloudFrontCognitoLink } from '../cognito/cloudFrontCognitoLink';
 import * as logs from 'aws-cdk-lib/aws-logs';
 import * as dotenv from 'dotenv';
 dotenv.config();
@@ -28,7 +28,7 @@ export interface RootCloudProps {
 
 export class RootCloud extends Construct {
   public readonly distribution: cloudfront.Distribution;
-  public readonly cloudFrontCognitoAuth: CloudFrontCognitoAuth;
+  public readonly cloudFrontCognitoAuth: CloudFrontCognitoLink;
   constructor(scope: Construct, id: string, props: RootCloudProps) {
     super(scope, id);
 
@@ -128,7 +128,7 @@ export class RootCloud extends Construct {
       )
     );
 
-    this.cloudFrontCognitoAuth = new CloudFrontCognitoAuth(this, 'CloudFrontCognitoAuth', {
+    this.cloudFrontCognitoAuth = new CloudFrontCognitoLink(this, 'CloudFrontCognitoAuth', {
       origin: assetsOrigin,
       userPoolName: `${AWS_API_ENDPOINT_NAME}-${AWS_HOSTED_ZONE_NAME}`.replace(/\./g, '-').toLocaleLowerCase(), // Replace dots with underscores for valid user pool name
       azureTenantId: COGNITO_AZURE_TENANT_ID, // Use the environment variable

@@ -53,7 +53,7 @@ export interface CognitoAzureAuthProps {
  * CognitoAzureAuth construct creates a Cognito User Pool with Azure AD integration
  * for authentication and authorization with CloudFront
  */
-export class CognitoAzureAuth extends Construct {
+export class CognitoAuth extends Construct {
   /**
    * The Cognito User Pool
    */
@@ -67,14 +67,16 @@ export class CognitoAzureAuth extends Construct {
   /**
    * The Cognito Identity Provider
    */
-  public readonly identityProvider: cognito.UserPoolIdentityProviderSaml;
+  // public readonly identityProvider: cognito.UserPoolIdentityProviderOidc;
+  public readonly userPoolAzureSaml: cognito.UserPoolIdentityProviderSaml;
+  public readonly cfnManagedLoginBranding: cognito.CfnManagedLoginBranding;
 
   constructor(scope: Construct, id: string, props: CognitoAzureAuthProps) {
     super(scope, id);
 
     // Create the user pool with email as the primary attribute
-    this.userPool = new cognito.UserPool(this, 'UserPool', {
-      userPoolName: props.userPoolName,
+    this.userPool = new cognito.UserPool(this, 'userPool', {
+      userPoolName: `${props.userPoolName}`,
       selfSignUpEnabled: false,
       signInAliases: {
         email: true
@@ -92,16 +94,7 @@ export class CognitoAzureAuth extends Construct {
       removalPolicy: cdk.RemovalPolicy.DESTROY
     });
 
-    // Add pre-token generation Lambda trigger if provided
-    if (props.preTokenGenerationFunction) {
-      this.userPool.addTrigger(
-        cognito.UserPoolOperation.PRE_TOKEN_GENERATION,
-        props.preTokenGenerationFunction
-      );
-    }
-
-    // Configure the Azure AD Identity Provider as SAML instead of OIDC
-    this.identityProvider = new cognito.UserPoolIdentityProviderSaml(this, 'AzureADProvider', {
+    this.userPoolAzureSaml = new cognito.UserPoolIdentityProviderSaml(this, 'userPoolAzureSaml', {
       userPool: this.userPool,
       name: COGNITO_PROVIDER_NAME,
       metadata: {
@@ -118,24 +111,19 @@ export class CognitoAzureAuth extends Construct {
       },
       identifiers: [props.azureClientId],
     });
-    (this.identityProvider.node.defaultChild as cdk.CfnResource).applyRemovalPolicy(cdk.RemovalPolicy.DESTROY);
-    // Create a user pool client
-    this.userPoolClient = new cognito.UserPoolClient(this, 'UserPoolClient', {
-      /*
-      aws cognito-idp create-user-pool-client \
- --user-pool-id <yourUserPoolID> \
- --client-name <yourAppClientName> \
- --no-generate-secret \
- --callback-urls <callbackURL> \
- --allowed-o-auth-flows code \
- --allowed-o-auth-scopes openid email\
- --supported-identity-providers <IDProviderName> \
- --allowed-o-auth-flows-user-pool-client
 
-       */
+
+    // Add pre-token generation Lambda trigger if provided
+    if (props.preTokenGenerationFunction) {
+      this.userPool.addTrigger(
+        cognito.UserPoolOperation.PRE_TOKEN_GENERATION,
+        props.preTokenGenerationFunction
+      );
+    }
+
+    this.userPoolClient = new cognito.UserPoolClient(this, 'userPoolClient', {
       userPoolClientName: COGNITO_USER_POOL_NAME, // 'AzureADClient',
       generateSecret: false, // Set to true if you need a client secret
-
       userPool: this.userPool,
       authFlows: {
         userPassword: false,
@@ -145,7 +133,7 @@ export class CognitoAzureAuth extends Construct {
       oAuth: {
         flows: {
           authorizationCodeGrant: true,
-          implicitCodeGrant: false
+          // implicitCodeGrant: false
         },
         scopes: [
           cognito.OAuthScope.OPENID,
@@ -153,16 +141,18 @@ export class CognitoAzureAuth extends Construct {
           cognito.OAuthScope.PROFILE
         ],
         callbackUrls: [`https://${AWS_API_ENDPOINT_NAME}.${AWS_HOSTED_ZONE_NAME}/callback.html`], // Replace with your actual callback URLs
-        logoutUrls: [`https://${AWS_API_ENDPOINT_NAME}.${AWS_HOSTED_ZONE_NAME}/logout.html`]     // Replace with your actual logout URLs
+        logoutUrls: [`https://${AWS_API_ENDPOINT_NAME}.${AWS_HOSTED_ZONE_NAME}/logout.html`,
+          `https://${AWS_API_ENDPOINT_NAME}.${AWS_HOSTED_ZONE_NAME}/logout.html?logoutComplete=true`
+        ]     // Replace with your actual logout URLs
       },
       supportedIdentityProviders: [
         cognito.UserPoolClientIdentityProvider.COGNITO,
-        cognito.UserPoolClientIdentityProvider.custom((this.identityProvider as cognito.UserPoolIdentityProviderSaml).providerName)
+        cognito.UserPoolClientIdentityProvider.custom(this.userPoolAzureSaml.providerName)
       ]
     });
 
     // Wait for the identity provider to be created before creating the user pool domain
-    this.userPoolClient.node.addDependency(this.identityProvider);
+    // this.userPoolClient.node.addDependency(this.identityProvider);
     this.userPool.addDomain('UserPoolDomain', {
       cognitoDomain: {
         domainPrefix: `${COGNITO_USER_POOL_DOMAIN}`
@@ -172,5 +162,24 @@ export class CognitoAzureAuth extends Construct {
     const cfnDomain = this.userPool.node.findChild('UserPoolDomain') as cognito.CfnUserPoolDomain;
     cfnDomain.applyRemovalPolicy(cdk.RemovalPolicy.DESTROY);
 
+    const settings: any = {};
+    this.cfnManagedLoginBranding = new cognito.CfnManagedLoginBranding(this, 'MyCfnManagedLoginBranding', {
+      userPoolId: this.userPool.userPoolId,
+
+      // the properties below are optional
+      // assets: [{
+      //   category: 'category',
+      //   colorMode: 'colorMode',
+      //   extension: 'extension',
+
+      //   // the properties below are optional
+      //   bytes: 'bytes',
+      //   resourceId: 'resourceId',
+      // }],
+      clientId:  this.userPoolClient.userPoolClientId,
+      // returnMergedResources: true,
+      // settings: settings,
+      useCognitoProvidedValues: true,
+    });
   }
 }

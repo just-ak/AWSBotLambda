@@ -34,7 +34,7 @@
     "**/*.ts",
     "setup.mjs",
     "teardown.mjs"
-, "src/adaptiveBot/internal/initialize.js", "src/edgeAuth/index.mjs"  ],
+, "src/adaptiveBot/internal/initialize.js", "src/edgeAuth/index.mjs", "lib/cognito/cognitoAzureSAML.ts.unused", "lib/cognito/cognitoAzureOIDC copy.ts.unused"  ],
   "exclude": [
     "node_modules",
     "cdktf.out",
