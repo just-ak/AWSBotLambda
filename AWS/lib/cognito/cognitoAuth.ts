@@ -156,7 +156,9 @@ export class CognitoAuth extends Construct {
     this.userPool.addDomain('UserPoolDomain', {
       cognitoDomain: {
         domainPrefix: `${COGNITO_USER_POOL_DOMAIN}`
-      }
+        
+      },
+       managedLoginVersion: cognito.ManagedLoginVersion.NEWER_MANAGED_LOGIN,
 
     });
     const cfnDomain = this.userPool.node.findChild('UserPoolDomain') as cognito.CfnUserPoolDomain;

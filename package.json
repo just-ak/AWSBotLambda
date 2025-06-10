@@ -8,6 +8,6 @@
   "scripts": {
     "build": "yarn workspaces run build",
     "package": "yarn workspaces run package",
-    "cdk": "cd AWS && cdk"
+    "cdk": "cd AWS && yarn cdk"
   }
 }
