@@ -38,7 +38,9 @@ exports.handler = async (event) => {
 
 
   // Allow the callback URL with code to pass through without authentication
-  if (uri === redirectPath && queryString.includes('code=')) {
+  if (uri === redirectPath )
+    //&& queryString.includes('code=')) 
+  {
     console.log('EdgeAuth - Auth callback detected, allowing through without authentication');
 
     // Add appropriate CSP headers to allow Cognito domain
@@ -83,9 +85,39 @@ exports.handler = async (event) => {
   );
   console.log('EdgeAuth - Parsed cookies:', JSON.stringify(cookies, null, 2));
 
-  const isAuthenticated = cookies['id_token'] !== undefined;
-  console.log('EdgeAuth - Authentication status:', isAuthenticated ? 'Authenticated' : 'Not Authenticated');
-
+  // Check if id_token exists
+  const idToken = cookies['id_token'];
+  let isAuthenticated = idToken !== undefined;
+  
+  // Check if token is expired
+  if (isAuthenticated) {
+    try {
+      // JWT tokens consist of three parts: header.payload.signature
+      // We need to decode the payload (second part)
+      const tokenParts = idToken.split('.');
+      if (tokenParts.length !== 3) {
+        console.log('EdgeAuth - Invalid token format');
+        isAuthenticated = false;
+      } else {
+        // Base64-decode the payload
+        const payload = JSON.parse(Buffer.from(tokenParts[1], 'base64').toString('utf8'));
+        console.log('EdgeAuth - Token payload:', JSON.stringify(payload, null, 2));
+        
+        // Check expiration time
+        const currentTime = Math.floor(Date.now() / 1000);
+        if (!payload.exp || payload.exp < currentTime) {
+          console.log('EdgeAuth - Token expired:', payload.exp, 'Current time:', currentTime);
+          isAuthenticated = false;
+        } else {
+          console.log('EdgeAuth - Token valid until:', new Date(payload.exp * 1000).toISOString());
+        }
+      }
+    } catch (error) {
+      console.log('EdgeAuth - Error decoding token:', error.message);
+      isAuthenticated = false;
+    }
+  }
+  
   if (!isAuthenticated) {
     const loginUrl = `${cognitoDomain}/login?response_type=code&client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}`;
     console.log('EdgeAuth - Redirecting to login URL:', loginUrl);
@@ -98,6 +130,8 @@ exports.handler = async (event) => {
         'cache-control': [{ key: 'Cache-Control', value: 'no-cache' }]
       }
     };
+  } else {
+     return request;
   }
 
   // User is authenticated

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AWS Bot Documentation</title>
+    <title>AWS Bot Documentation #2 </title>
     <style>
         :root {
             --primary-color: #232f3e;
@@ -224,6 +224,39 @@
             margin: 1rem 0;
             border-radius: 0 4px 4px 0;
         }
+
+         .session-timer {
+            display: flex;
+            align-items: center;
+            margin-right: 1rem;
+            color: white;
+            font-size: 0.9rem;
+        }
+        
+        .session-timer-icon {
+            margin-right: 0.5rem;
+            font-size: 1.1rem;
+        }
+        
+        .session-timer.warning {
+            color: #ffcc00;
+        }
+        
+        .session-timer.critical {
+            color: #ff6b6b;
+            animation: pulse 1s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.6; }
+            100% { opacity: 1; }
+        }
+        
+        .nav-actions {
+            display: flex;
+            align-items: center;
+        }
     </style>
 </head>
 <body>
@@ -234,6 +267,11 @@
                     <h1>AWS <span>Bot</span> Documentation</h1>
                 </div>
                 <div class="nav-actions">
+                    <!-- Add session timer here -->
+                    <div class="session-timer" id="session-timer">
+                        <span class="session-timer-icon">⏱️</span>
+                        <span id="timer-display">Checking session...</span>
+                    </div>
                     <a href="/logout.html" class="logout-button">Logout</a>
                 </div>
             </div>
@@ -646,6 +684,96 @@ export function renderAdaptiveCard(data: any): any {
     </footer>
     
     <script>
+        // Cookie helper functions
+        function getCookie(name) {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts.length === 2) return parts.pop().split(';').shift();
+            return null;
+        }
+        
+        // JWT decode function (simplified)
+        function parseJwt(token) {
+            try {
+                // For JWT tokens
+                const base64Url = token.split('.')[1];
+                if (base64Url) {
+                    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+                    const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+                        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+                    }).join(''));
+                    return JSON.parse(jsonPayload);
+                }
+                // For simple timestamp cookies
+                return { exp: parseInt(token) };
+            } catch (e) {
+                console.error('Error parsing token:', e);
+                return null;
+            }
+        }
+        
+        // Session timer functionality
+        function initSessionTimer() {
+            const timerDisplay = document.getElementById('timer-display');
+            const timerContainer = document.getElementById('session-timer');
+            const idToken = getCookie('id_token');
+            
+            if (!idToken) {
+                timerDisplay.textContent = 'No active session';
+                return;
+            }
+            
+            // Try to parse the token
+            const parsedToken = parseJwt(idToken);
+            if (!parsedToken || !parsedToken.exp) {
+                // If token doesn't have expiration or can't be parsed
+                // Try to see if the cookie itself has an expiration
+                timerDisplay.textContent = 'Session active';
+                return;
+            }
+            
+            const expirationTime = parsedToken.exp * 1000; // Convert to milliseconds
+            
+            // Update timer every second
+            function updateTimer() {
+                const now = new Date().getTime();
+                const timeLeft = expirationTime - now;
+                
+                if (timeLeft <= 0) {
+                    timerDisplay.textContent = 'Session expired';
+                    timerContainer.className = 'session-timer critical';
+                    clearInterval(timerInterval);
+                    setTimeout(() => {
+                        alert('Your session has expired. Please log in again.');
+                        window.location.href = '/logout.html';
+                    }, 1000);
+                    return;
+                }
+                
+                // Format time remaining
+                const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+                
+                timerDisplay.textContent = `Session: ${minutes}m ${seconds}s`;
+                
+                // Add warning classes based on time left
+                if (timeLeft < 60000) { // Less than 1 minute
+                    timerContainer.className = 'session-timer critical';
+                } else if (timeLeft < 300000) { // Less than 5 minutes
+                    timerContainer.className = 'session-timer warning';
+                } else {
+                    timerContainer.className = 'session-timer';
+                }
+            }
+            
+            // Update immediately and then set interval
+            updateTimer();
+            const timerInterval = setInterval(updateTimer, 1000);
+        }
+        
+        // Initialize timer when page loads
+        window.addEventListener('DOMContentLoaded', initSessionTimer);
+        
         function showTab(tabId) {
             // Hide all tab contents
             const tabContents = document.querySelectorAll('.tab-content');

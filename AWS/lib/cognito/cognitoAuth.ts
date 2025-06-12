@@ -4,6 +4,8 @@ import * as iam from 'aws-cdk-lib/aws-iam';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import { Construct } from 'constructs';
 import * as dotenv from 'dotenv';
+import * as fs from 'fs';
+import * as path from 'path';
 dotenv.config();
 // const AWS_HOSTED_ZONE_ID = process.env.AWS_HOSTED_ZONE_ID || 'default_hosted_zone_id';
 const AWS_HOSTED_ZONE_NAME = process.env.AWS_HOSTED_ZONE_NAME || 'default_hosted_zone_name';
@@ -125,6 +127,13 @@ export class CognitoAuth extends Construct {
       userPoolClientName: COGNITO_USER_POOL_NAME, // 'AzureADClient',
       generateSecret: false, // Set to true if you need a client secret
       userPool: this.userPool,
+      enableTokenRevocation: true,
+      accessTokenValidity: cdk.Duration.minutes(15),
+      idTokenValidity: cdk.Duration.minutes(15),
+      refreshTokenValidity: cdk.Duration.days(30),
+      authSessionValidity: cdk.Duration.minutes(15),
+      preventUserExistenceErrors: true,
+      // preventUserExistenceErrors: cognito.PreventUserExistenceErrorType.ENABLED,
       authFlows: {
         userPassword: false,
         userSrp: false,
@@ -164,20 +173,61 @@ export class CognitoAuth extends Construct {
     const cfnDomain = this.userPool.node.findChild('UserPoolDomain') as cognito.CfnUserPoolDomain;
     cfnDomain.applyRemovalPolicy(cdk.RemovalPolicy.DESTROY);
 
+const backgroundImage = fs.readFileSync(path.join(__dirname, 'bg.jpg')).toString('base64');
+
+    // https://docs.aws.amazon.com/AWSCloudFormation/latest/TemplateReference/aws-resource-cognito-managedloginbranding.html
+    // https://docs.aws.amazon.com/AWSCloudFormation/latest/TemplateReference/aws-properties-cognito-managedloginbranding-assettype.html
+    /*
+        Bytes
+            The image file, in Base64-encoded binary.
+            Required: No
+            Type: String
+            Maximum: 1000000
+            Update requires: No interruption
+        Category
+            The category that the image corresponds to in your managed login configuration. Managed login has asset categories for different types of logos, backgrounds, and icons.
+            Required: Yes
+            Type: String
+            Allowed values: FAVICON_ICO | FAVICON_SVG | EMAIL_GRAPHIC | SMS_GRAPHIC | AUTH_APP_GRAPHIC | PASSWORD_GRAPHIC | PASSKEY_GRAPHIC | PAGE_HEADER_LOGO | PAGE_HEADER_BACKGROUND | PAGE_FOOTER_LOGO | PAGE_FOOTER_BACKGROUND | PAGE_BACKGROUND | FORM_BACKGROUND | FORM_LOGO | IDP_BUTTON_ICON
+            Update requires: No interruption
+        ColorMode
+            The display-mode target of the asset: light, dark, or browser-adaptive. For example, Amazon Cognito displays a dark-mode image only when the browser or application is in dark mode, but displays a browser-adaptive file in all contexts.
+            Required: Yes
+            Type: String
+            Allowed values: LIGHT | DARK | DYNAMIC
+            Update requires: No interruption
+        Extension
+            The file type of the image file.
+            Required: Yes
+            Type: String
+            Allowed values: ICO | JPEG | PNG | SVG | WEBP
+            Update requires: No interruption
+        ResourceId
+            The ID of the asset.
+            Required: No
+            Type: String
+            Pattern: ^[\w\- ]+$
+            Minimum: 1
+            Maximum: 40
+            Update requires: No interruption
+    */
+
     const settings: any = {};
     this.cfnManagedLoginBranding = new cognito.CfnManagedLoginBranding(this, 'MyCfnManagedLoginBranding', {
       userPoolId: this.userPool.userPoolId,
-
-      // the properties below are optional
-      // assets: [{
-      //   category: 'category',
-      //   colorMode: 'colorMode',
-      //   extension: 'extension',
-
-      //   // the properties below are optional
-      //   bytes: 'bytes',
-      //   resourceId: 'resourceId',
-      // }],
+      assets: [ {
+        category: 'PAGE_BACKGROUND',
+        colorMode: 'LIGHT',
+        extension: 'JPEG',
+        bytes: backgroundImage, // Replace with your actual base64 encoded logo
+        // resourceId: 'logo-light',
+      }, {
+        category: 'PAGE_BACKGROUND',
+        colorMode: 'DARK',
+        extension: 'JPEG', // Replace with your actual base64 encoded logo
+        bytes: backgroundImage, // Replace with your actual base64 encoded logo
+        // resourceId: 'logo-dark',
+      }],
       clientId:  this.userPoolClient.userPoolClientId,
       // returnMergedResources: true,
       // settings: settings,
